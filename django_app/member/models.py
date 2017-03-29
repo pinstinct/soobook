@@ -33,6 +33,8 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
         'nickname',
                        ]
 
+    objects = MyUserManager()
+
     def __str__(self):
         return '{},{}'.format(
             self.username,
