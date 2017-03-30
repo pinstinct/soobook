@@ -26,6 +26,7 @@ api_urlpatterns = [
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'member/', include('rest_auth.urls')),
     url(r'^api/', include(api_urlpatterns, namespace='api')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
