@@ -4,17 +4,19 @@ from django.db import models
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, username, password=None):
+    def create_user(self, username, nickname, password=None):
         user = self.model(
-            username=username
+            username=username,
+            nickname=nickname,
         )
         user.set_password(password)
         user.save()
         return user
 
-    def create_superuser(self, username, password):
+    def create_superuser(self, username, nickname, password):
         user = self.model(
-            username=username
+            username=username,
+            nickname=nickname,
         )
         user.set_password(password)
         user.is_staff = True
@@ -31,7 +33,7 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = [
         'nickname',
-                       ]
+    ]
 
     objects = MyUserManager()
 

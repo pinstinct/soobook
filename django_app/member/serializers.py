@@ -4,6 +4,15 @@ from rest_framework import serializers
 User = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
-        pass
+        model = User
+        fields = (
+            'username',
+            'nickname',
+            'password',
+        )
+
+    def create(self, validated_data):
+        instance = User.objects.create_user(**validated_data)
+        return instance
