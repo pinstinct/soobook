@@ -1,15 +1,15 @@
 from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import ugettext_lazy as _
-from rest_auth.models import TokenModel
 from rest_framework import exceptions
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 
 
 class TokenSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TokenModel
+        model = Token
         fields = (
             'key',
         )
