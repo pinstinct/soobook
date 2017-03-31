@@ -18,7 +18,6 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 
-from member.apis.token import LogoutView
 from member.urls import apis as member_apis_urls
 
 api_urlpatterns = [
@@ -27,8 +26,8 @@ api_urlpatterns = [
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url('^member/logout/', LogoutView.as_view()),
-    url(r'member/', include('rest_auth.urls')),
+    # url('^member/logout/', LogoutView.as_view()),
+    # url(r'member/', include('rest_auth.urls')),
     url(r'^api/', include(api_urlpatterns, namespace='api')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
