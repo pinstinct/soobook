@@ -1,5 +1,7 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
+from django.core.exceptions import ObjectDoesNotExist
 from rest_auth.models import TokenModel
+from rest_framework import permissions
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -10,6 +12,7 @@ from member.serializers import SignUpSerializer, LoginSerializer, TokenSerialize
 __all__ = (
     'SignUp',
     'Login',
+    'Logout'
 )
 
 User = get_user_model()
@@ -36,3 +39,17 @@ class Login(APIView):
                 token, _ = token_model.objects.get_or_create(user=user)
                 serializer_token = TokenSerializer(instance=token)
             return Response(serializer_token.data, status=status.HTTP_200_OK)
+
+
+class Logout(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        try:
+            request.auth.delete()
+        except (AttributeError, ObjectDoesNotExist):
+            return Response({'detail': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+
+        logout(request)
+        return Response({"detail": "Successfully logged out."},
+                        status=status.HTTP_200_OK)
