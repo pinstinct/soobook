@@ -1,23 +1,18 @@
 from django.contrib.auth import get_user_model
+from rest_auth.models import TokenModel
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from member.serializers import SignUpSerializer
+from member.serializers import SignUpSerializer, LoginSerializer, TokenSerializer
 
 __all__ = (
-    # 'SignUpView',
-    # 'ProfileView',
     'SignUp',
     'Login',
 )
 
 User = get_user_model()
-
-
-# class SignUpView(generics.CreateAPIView):
-#     serializer_class = SignUpSerializer
 
 
 class SignUp(APIView):
@@ -30,21 +25,14 @@ class SignUp(APIView):
 
 
 class Login(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
-
-    def post(self, request, format=None):
-        content = {
-            'user': request.user,
-            'auth': request.auth,
-        }
-        print(content)
-        return Response(content)
-
-# class ProfileView(APIView):
-#     permission_classes = (permissions.IsAuthenticated,)
-#
-#     def get(self, request, *args, **kwargs):
-#         user = request.user
-#         serializer = LoginSerializer(user)
-#         return Response(serializer.data)
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        token_model = TokenModel
+        if serializer.is_valid(raise_exception=True):
+            if serializer.data:
+                user = serializer.validated_data['user']
+                token, _ = token_model.objects.get_or_create(user=user)
+                serializer_token = TokenSerializer(instance=token)
+            return Response(serializer_token.data, status=status.HTTP_200_OK)
