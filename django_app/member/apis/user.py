@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model, logout
 from django.core.exceptions import ObjectDoesNotExist
-from rest_auth.models import TokenModel
 from rest_framework import permissions
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -32,13 +32,12 @@ class Login(APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
-        token_model = TokenModel
+        token_model = Token
         if serializer.is_valid(raise_exception=True):
-            if serializer.data:
-                user = serializer.validated_data['user']
-                token, _ = token_model.objects.get_or_create(user=user)
-                serializer_token = TokenSerializer(instance=token)
-            return Response(serializer_token.data, status=status.HTTP_200_OK)
+            user = serializer.validated_data['user']
+            token, _ = token_model.objects.get_or_create(user=user)
+            serializer_token = TokenSerializer(instance=token)
+        return Response(serializer_token.data, status=status.HTTP_200_OK)
 
 
 class Logout(APIView):
