@@ -5,9 +5,16 @@ User = get_user_model()
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        style={'input_type': 'password'},
+        write_only=True,
+        min_length=6,
+    )
+
     class Meta:
         model = User
         fields = (
+            'pk',
             'username',
             'nickname',
             'password',
@@ -17,11 +24,10 @@ class SignUpSerializer(serializers.ModelSerializer):
         instance = User.objects.create_user(**validated_data)
         return instance
 
-
-class LoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'nickname',
-        )
+# class LoginSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = (
+#             'username',
+#             'nickname',
+#         )
