@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APILiveServerTestCase
+
 # from passlib.hash import pbkdf2_sha256
 
 User = get_user_model()
@@ -28,10 +29,12 @@ class TestUser(APITestCase, APILiveServerTestCase):
         url = reverse('api:signup')
         data = {
             'username': 'test@teat.com',
+            'nickname': 'testnick',
             'password': 'testpassword',
         }
-        self.client.post(url, data, format='json')
+        response_sign = self.client.post(url, data, format='json')
+        self.assertEqual(response_sign.status_code, status.HTTP_201_CREATED)
 
-        url = reverse('member')
+        url = reverse('api:login')
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
