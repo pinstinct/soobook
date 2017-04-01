@@ -54,7 +54,6 @@ class LoginSerializer(serializers.Serializer):
                 msg = _('User account is disabled.')
                 raise exceptions.ValidationError(msg)
         else:
-            print(user)
             msg = _('Incorrect ID or Password')
             raise exceptions.ValidationError(msg)
 
