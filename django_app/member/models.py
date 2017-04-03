@@ -2,8 +2,6 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
-from book.models import Book
-
 
 class MyUserManager(BaseUserManager):
     def create_user(self, username, nickname, password=None):
@@ -32,9 +30,9 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     nickname = models.CharField(max_length=256)
     is_staff = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True)
-    mybook = models.ManyToManyField(
-        Book
-    )
+    # mybook = models.ManyToManyField(
+    #     'Book'
+    # )
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = [
