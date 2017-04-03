@@ -1,4 +1,7 @@
+from django.contrib.auth import get_user_model
 from django.db import models
+
+User = get_user_model()
 
 
 class Book(models.Model):
@@ -9,3 +12,9 @@ class Book(models.Model):
     description = models.TextField()
     updated_date = models.DateTimeField(auto_now=True)
     google_id = models.CharField(max_length=100)
+
+
+class MyBookShelf(models.Model):
+    my_book = models.ForeignKey(Book)
+    user = models.ForeignKey(User)
+    created_date = models.DateTimeField(auto_now_add=True)
