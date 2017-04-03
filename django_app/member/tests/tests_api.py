@@ -1,9 +1,12 @@
+import json
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APIClient
 from rest_framework.test import APITestCase, APILiveServerTestCase
 
-# from passlib.hash import pbkdf2_sha256
+from django.contrib.auth.hashers import PBKDF2PasswordHasher
 
 User = get_user_model()
 
@@ -16,7 +19,7 @@ class TestUser(APITestCase, APILiveServerTestCase):
             'nickname': 'testnick',
             'password': 'testpassword'
         }
-        # hash_password = pbkdf2_sha256.using(rounds=30000, salt_size=8).hash("testpassword")
+        hash_password = PBKDF2PasswordHasher()
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.count(), 1)
@@ -38,3 +41,31 @@ class TestUser(APITestCase, APILiveServerTestCase):
         url = reverse('api:login')
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_logout(self):
+        url = reverse('api:signup')
+        data = {
+            'username': 'test@teat.com',
+            'nickname': 'testnick',
+            'password': 'testpassword',
+        }
+        response_signup = self.client.post(url, data, format='json')
+        self.assertEqual(response_signup.status_code, status.HTTP_201_CREATED)
+
+        data = {
+            'username': 'test@teat.com',
+            'password': 'testpassword',
+        }
+        url = reverse('api:login')
+        response_login = self.client.post(url, data)
+        self.assertEqual(response_login.status_code, status.HTTP_200_OK)
+
+        response_login_json = json.dumps(response_login.data)
+        response_login_dict = json.loads(response_login_json)
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + response_login_dict["key"])
+
+        url = reverse('api:logout')
+        response_login = client.post(url)
+        self.assertEqual(response_login.status_code, status.HTTP_200_OK)
