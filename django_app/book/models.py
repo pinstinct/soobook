@@ -1,4 +1,3 @@
-import requests
 from django.db import models
 
 
@@ -13,6 +12,9 @@ class Book(models.Model):
     description = models.TextField()
     updated_date = models.DateTimeField(auto_now=True)
     google_id = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.title
 
 # class MyBookShelf(models.Model):
 #     my_book = models.ForeignKey(Book)
