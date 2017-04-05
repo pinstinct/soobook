@@ -1,12 +1,11 @@
 import json
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import PBKDF2PasswordHasher
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase, APILiveServerTestCase
-
-from django.contrib.auth.hashers import PBKDF2PasswordHasher
 
 User = get_user_model()
 

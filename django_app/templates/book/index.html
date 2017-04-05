@@ -1,0 +1,40 @@
+<!doctype html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Search Index</title>
+  </head>
+  <body>
+    <div>
+      <form action="" method="POST">{% csrf_token %}
+        <input type="text" name="keyword">
+        <button type="submit">검색</button>
+      </form>
+    </div>
+
+
+    <div>
+        <div>{% totalItems %}
+        {% keyword %}
+        </div>
+      {% for book in books %}
+        <div>{% book.total_items %}</div>
+
+
+    <div>
+      {% for book in books %}
+      <ul>
+        <li>{{ book.title }}</li>
+        <li>{{ book.author }}</li>
+        <li>{{ book.cover_thumbnail }}</li>
+        <li>{{ book.publisher }}</li>
+        <li>{{ book.description }}</li>
+        <li>{{ book.google_id }}</li>
+      </ul>
+      {% endfor %}
+    </div>
+  </body>
+</html>
