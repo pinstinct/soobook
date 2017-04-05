@@ -14,7 +14,11 @@
         <button type="submit">검색</button>
       </form>
     </div>
+
     <div>
+        <div>{% totalItems %}
+        {% keyword %}
+        </div>
       {% for book in books %}
         <div>{% book.total_items %}</div>
       <ul>
