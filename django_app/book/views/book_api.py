@@ -10,12 +10,12 @@ __all__ = (
 )
 
 
-def search_from_google_books(keyword, index=0):
+def search_from_google_books(keyword, index=None):
     if index:
         index = index
     else:
-        index = 10
-    print(index)
+        index = 0
+    # print(index)
     params = {
         'q': keyword,
         'langRestrict': 'ko',
@@ -25,7 +25,6 @@ def search_from_google_books(keyword, index=0):
     }
     r = requests.get('https://www.googleapis.com/books/v1/volumes', params=params)
     result_dic = r.json()
-
     return result_dic
 
 
@@ -40,6 +39,18 @@ def get_isbn_from_google_book(google_id):
         if identifier['type'] == 'ISBN_13':
             isbn = identifier['identifier']
     return isbn
+
+
+def get_description_from_google_book(google_id):
+    params = {
+        'volumeId': google_id
+    }
+    r = requests.get('https://www.googleapis.com/books/v1/volumes/volumeId', params=params)
+    result_dict = r.json()
+    google_description = result_dict['volumeInfo']['description']
+    if google_description:
+        description = google_description
+    return description
 
 
 def search_from_daum_books(keyword):
@@ -63,6 +74,7 @@ def search(request):
     context = {
         'books': books
     }
+
     keyword = request.POST.get('keyword', '').strip()
     if keyword != '':
         google_result_dic = search_from_google_books(keyword)
@@ -72,11 +84,13 @@ def search(request):
             google_id = item['id']
             title = item['volumeInfo']['title']
 
+            # authors
             try:
                 authors = item['volumeInfo']['authors'][0]
             except:
                 authors = ''
 
+            # cover_thumbnail
             try:
                 cover_thumbnail = item['volumeInfo']['imageLinks']['thumbnail']
             except:
@@ -88,41 +102,50 @@ def search(request):
                 except:
                     cover_thumbnail = ''
 
+            # publisher
             try:
                 publisher = item['volumeInfo']['publisher']
             except:
                 try:
                     isbn = get_isbn_from_google_book(google_id)
                     daum_item = search_from_daum_books(isbn)
-                    print(isbn)
+                    print(isbn) 
                     publisher = daum_item['pub_nm']
                 except:
                     publisher = ''
 
+            # description
             try:
                 description = item['volumeInfo']['description']
             except:
                 try:
-                    isbn = get_isbn_from_google_book(google_id)
-                    daum_item = search_from_daum_books(isbn)
-                    print(isbn)
-                    description = daum_item['description']
+                    google_description = get_description_from_google_book(google_id)
+                    description = google_description
                 except:
-                    description = ''
+                    try:
+                        isbn = get_isbn_from_google_book(google_id)
+                        daum_item = search_from_daum_books(isbn)
+                        print(isbn)
+                        description = daum_item['description']
+                    except:
+                        description = ''
 
+            # 데이터베이스에 저장
             defaults = {
-                'google_id': google_id,
+                # 'google_id': google_id,
                 'title': title,
                 'author': authors,
                 'cover_thumbnail': cover_thumbnail,
                 'publisher': publisher,
+                'description': description,
             }
-            obj, created = Book.objects.get_or_create(
-                description=description,
+            obj, updated = Book.objects.update_or_create(
+                google_id=google_id,
+                description='',
                 defaults=defaults
             )
-            print(obj)
-            print(created)
+            # print(obj)
+            # print(updated)
             item_dict = {
                 'title': title,
                 'author': authors,
@@ -132,5 +155,4 @@ def search(request):
                 'google_id': google_id
             }
             books.append(item_dict)
-
     return render(request, 'book/index.html', context)
