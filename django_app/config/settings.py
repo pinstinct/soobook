@@ -114,6 +114,7 @@ INSTALLED_APPS = [
     'storages',
 
     'member',
+    'book',
 ]
 
 MIDDLEWARE = [
