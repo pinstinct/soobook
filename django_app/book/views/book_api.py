@@ -97,7 +97,7 @@ def search(request):
                 try:
                     isbn = get_isbn_from_google_book(google_id)
                     daum_item = search_from_daum_books(isbn)
-                    print(isbn)
+                    # print(isbn)
                     cover_thumbnail = daum_item['cover_l_url']
                 except:
                     cover_thumbnail = ''
@@ -109,7 +109,7 @@ def search(request):
                 try:
                     isbn = get_isbn_from_google_book(google_id)
                     daum_item = search_from_daum_books(isbn)
-                    print(isbn) 
+                    # print(isbn)
                     publisher = daum_item['pub_nm']
                 except:
                     publisher = ''
@@ -125,7 +125,7 @@ def search(request):
                     try:
                         isbn = get_isbn_from_google_book(google_id)
                         daum_item = search_from_daum_books(isbn)
-                        print(isbn)
+                        # print(isbn)
                         description = daum_item['description']
                     except:
                         description = ''
