@@ -25,8 +25,6 @@ from member.urls import apis as member_apis_urls
 api_urlpatterns = [
     url(r'^user/', include(member_apis_urls)),
 
-    # url(r'^book/', include(book_apis_urls)),
-
 ]
 
 urlpatterns = [

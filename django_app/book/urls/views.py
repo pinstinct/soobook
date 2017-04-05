@@ -6,4 +6,6 @@ urlpatterns = [
 
     url(r'^search/$', views.search, name='search'),
 
+    url(r'^$', views.search, name='search'),
+
 ]
