@@ -7,7 +7,7 @@ class Book(models.Model):
     author = models.CharField(max_length=200)
     cover_thumbnail = models.URLField()
     publisher = models.CharField(max_length=100)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField()
     updated_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
