@@ -17,8 +17,8 @@ class Search(generics.ListAPIView):
     template_name = 'book/index.html'
 
     def get_search_result_query(self, **kwargs):
-        # project_id may be None
         return self.queryset.filter(keyword=self.kwargs.get('keyword'))
+
 
 class MyBook(APIView):
     def get(self):
