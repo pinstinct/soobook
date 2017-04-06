@@ -11,10 +11,10 @@ class SearchSerializer(serializers.ModelSerializer):
     publisher = serializers.CharField(max_length=100)
     description = serializers.CharField(max_length=1000)
 
-    def create(self, *args, **kwargs):
-        pass
+
 
     class meta:
+        model = Book
         fields = [
             'title',
             'author',

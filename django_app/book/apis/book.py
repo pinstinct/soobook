@@ -14,6 +14,7 @@ __all__ = (
 class Search(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = SearchSerializer
+    template_name = 'book/index.html'
 
     def get_queryset(self, **kwargs):
         # project_id may be None
