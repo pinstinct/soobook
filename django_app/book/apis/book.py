@@ -16,14 +16,10 @@ class Search(generics.ListAPIView):
     serializer_class = SearchSerializer
     template_name = 'book/index.html'
 
-    def get_queryset(self, **kwargs):
+    def get_search_result_query(self, **kwargs):
         # project_id may be None
-        return self.queryset \
-            .filter(title=self.kwargs.get('title')) \
-            .filter(author=self.kwargs.get('author'))
+        return self.queryset.filter(keyword=self.kwargs.get('keyword'))
 
-
-# 성수님
 class MyBook(APIView):
     def get(self):
         pass

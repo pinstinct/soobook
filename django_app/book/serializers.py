@@ -10,10 +10,9 @@ class SearchSerializer(serializers.ModelSerializer):
     cover_thumbnail = serializers.URLField()
     publisher = serializers.CharField(max_length=100)
     description = serializers.CharField(max_length=1000)
+    keyword = serializers.CharField(max_length=200)
 
-
-
-    class meta:
+    class Meta:
         model = Book
         fields = [
             'title',
@@ -21,6 +20,7 @@ class SearchSerializer(serializers.ModelSerializer):
             'cover_thumbnail',
             'publisher',
             'description',
+            'keyword'
         ]
 
 
