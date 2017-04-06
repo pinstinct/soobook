@@ -22,6 +22,7 @@ def search_from_google_books(keyword, index=None):
         'maxResults': 10,
         'startIndex': index,
         'orderBy': 'relevance',
+        'source': keyword,
     }
     r = requests.get('https://www.googleapis.com/books/v1/volumes', params=params)
     result_dic = r.json()
@@ -138,6 +139,7 @@ def search(request):
                 'cover_thumbnail': cover_thumbnail,
                 'publisher': publisher,
                 'description': description,
+                'keyword': keyword,
             }
             obj, updated = Book.objects.update_or_create(
                 google_id=google_id,
