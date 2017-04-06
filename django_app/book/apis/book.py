@@ -1,4 +1,7 @@
 from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from book.models import Book
@@ -11,13 +14,24 @@ __all__ = (
 
 
 # 주현님
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+
 class Search(generics.ListAPIView):
+    permission_classes = (AllowAny,)
     queryset = Book.objects.all()
     serializer_class = SearchSerializer
-    template_name = 'book/index.html'
+    pagination_class = StandardResultsSetPagination
 
-    def get_search_result_query(self, **kwargs):
-        return self.queryset.filter(keyword=self.kwargs.get('keyword'))
+    # @csrf_exempt
+    def list(self, request):
+        keyword = request.GET['keyword']
+        books = self.queryset.filter(keyword=keyword)
+        serializer = SearchSerializer(books, many=True)
+        return Response(serializer.data)
 
 
 class MyBook(APIView):
