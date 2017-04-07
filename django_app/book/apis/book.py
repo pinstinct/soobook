@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
-from rest_framework import generics
-from rest_framework import mixins
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
@@ -33,15 +33,28 @@ class MyBook(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        print(request.user.pk)
-        serializer = MyBookSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        try:
+            book_pk = request.data["book_pk"]
+            book = Book.objects.get(pk=book_pk)
+            request.user.mybook.add(book)
+            serializer = MyBookSerializer(book)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except MultiValueDictKeyError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        except (AttributeError, ObjectDoesNotExist):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
-        mybook = Book.objects.filter(myuser=request.user.pk)
-        mybook.delete()
-        return Response(status=status.HTTP_200_OK)
+        try:
+            book_pk = request.data["book_pk"]
+            book = Book.objects.get(pk=book_pk)
+            request.user.mybook_set.filter(book)
 
+            request.user.mybook.remove(book)
+            return Response(status=status.HTTP_200_OK)
+        except MultiValueDictKeyError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        except (AttributeError, ObjectDoesNotExist):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
