@@ -35,4 +35,5 @@ class SearchSerializer(serializers.ModelSerializer):
 
 
 
+
         # 성수님
