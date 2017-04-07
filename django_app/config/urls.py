@@ -19,17 +19,18 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from book.urls import apis as book_apis_urls
-from book.urls import views as book_urls
 from member.urls import apis as member_apis_urls
+from . import views
 
 api_urlpatterns = [
     url(r'^user/', include(member_apis_urls)),
+    url(r'^book/', include(book_apis_urls)),
 
 ]
 
 urlpatterns = [
+    url(r'^/', views.index),
     url(r'^admin/', admin.site.urls),
-    url(r'^', include(book_urls)),
     url(r'^api/', include(api_urlpatterns, namespace='api')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
