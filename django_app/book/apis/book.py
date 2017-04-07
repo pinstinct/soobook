@@ -1,24 +1,30 @@
-from rest_framework.views import APIView
+from django.contrib.auth import get_user_model
+from rest_framework import generics
+
+from book.models import Book
+from book.serializers import MyBookSerializer, BookSerializer
+from book.views import search as api_search
+from utils.pagination import BookPagination
 
 __all__ = (
     'Search',
     'MyBook',
 )
+User = get_user_model()
 
 
-# 주현님
-class Search(APIView):
-    def get(self):
-        pass
+class Search(generics.ListAPIView):
+    serializer_class = BookSerializer
+    pagination_class = BookPagination
+
+    def get_queryset(self):
+        keyword = self.request.query_params.get('keyword')
+        queryset = Book.objects.filter(keyword=keyword)
+        count = queryset.count()
+        if count < 20:
+            api_search(keyword)
+        return queryset
 
 
-# 성수님
-class MyBook(APIView):
-    def get(self):
-        pass
-
-    def post(self):
-        pass
-
-    def delete(self):
-        pass
+class MyBook(generics.CreateAPIView):
+    serializer_class = MyBookSerializer
