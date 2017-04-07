@@ -27,8 +27,9 @@ class Search(APIView):
 class MyBook(APIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    def get(self, request, user_id):
-        mybook = Book.objects.filter(myuser=user_id)
+    def get(self, request):
+        user_pk = request.GET["user_pk"]
+        mybook = Book.objects.filter(myuser=user_pk)
         serializer = MyBookSerializer(mybook, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -49,8 +50,6 @@ class MyBook(APIView):
         try:
             book_pk = request.data["book_pk"]
             book = Book.objects.get(pk=book_pk)
-            request.user.mybook_set.filter(book)
-
             request.user.mybook.remove(book)
             return Response(status=status.HTTP_200_OK)
         except MultiValueDictKeyError:
