@@ -38,7 +38,7 @@ class Search(generics.ListAPIView):
     def list(self, request):
         books = []
 
-        keyword = request.GET.get('keyword')
+        keyword = request.GET['keyword']
         if keyword != '':
             google_result_dic = search_from_google_books(keyword)
             google_items = google_result_dic['items']
