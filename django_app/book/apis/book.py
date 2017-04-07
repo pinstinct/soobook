@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import generics
 from rest_framework import mixins
+from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,12 +25,15 @@ class Search(APIView):
 
 # 성수님
 class MyBook(APIView):
-    def get(self, request):
-        mybook = Book.objects.filter(myuser=request.user.pk)
-        serializer = MyBookSerializer(mybook)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get(self, request, user_id):
+        mybook = Book.objects.filter(myuser=user_id)
+        serializer = MyBookSerializer(mybook, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        print(request.user.pk)
         serializer = MyBookSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
