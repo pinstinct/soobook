@@ -4,7 +4,7 @@ from book.models import Book
 from config.settings import config
 
 __all__ = (
-    'search_from_google_books',
+    # 'search_from_google_books',
     'search',
 )
 
