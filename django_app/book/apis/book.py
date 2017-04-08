@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.datastructures import MultiValueDictKeyError
+from rest_framework import exceptions
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
@@ -15,6 +16,7 @@ from utils.pagination import BookPagination
 
 __all__ = (
     'Search',
+    # 'SearchFix',
     'MyBook',
 )
 User = get_user_model()
@@ -25,12 +27,15 @@ class Search(generics.ListAPIView):
     pagination_class = BookPagination
 
     def get_queryset(self):
-        keyword = self.request.query_params.get('keyword')
-        queryset = Book.objects.filter(keyword=keyword)
-        count = queryset.count()
-        if count < 20:
-            api_search(keyword)
-        return queryset
+        keyword = self.request.query_params.get('keyword', None)
+        if keyword is not None:
+            queryset = Book.objects.filter(keyword=keyword)
+            count = queryset.count()
+            if count < 20:
+                api_search(keyword)
+            return queryset
+        else:
+            raise exceptions.ParseError({"ios_error_code": 4001, "keyword": ["This field is required."]})
 
 
 class MyBook(APIView):
