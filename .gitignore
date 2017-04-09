@@ -3,9 +3,11 @@
 .conf-secret/
 static_root/
 _Dockerfile*
+Dockerfile.*
 django_app/static/css/
 bower_components/
 node_modules/
+front/
 
 # Created by https://www.gitignore.io/api/pycharm,python,django,macos
 

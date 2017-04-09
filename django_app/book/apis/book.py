@@ -1,24 +1,135 @@
-from rest_framework.views import APIView
+from django.contrib.auth import get_user_model
+from rest_framework import exceptions
+from rest_framework import generics
+from rest_framework import mixins
+from rest_framework import status
+from rest_framework.response import Response
+
+from book.models import Book
+from book.serializers import BookSerializer
+from book.serializers import MyBookSerializer
+from book.views import search as api_search
+from utils.pagination import BookPagination, MyBookPagination
 
 __all__ = (
     'Search',
     'MyBook',
 )
 
-
-# 주현님
-class Search(APIView):
-    def get(self):
-        pass
+User = get_user_model()
 
 
-# 성수님
-class MyBook(APIView):
-    def get(self):
-        pass
+class Search(generics.ListAPIView):
+    serializer_class = BookSerializer
+    pagination_class = BookPagination
 
-    def post(self):
-        pass
+    def get_queryset(self):
+        field = self.request.query_params.keys()
+        if field:
+            keyword = self.request.query_params.get('keyword', '')
+            if keyword:
+                queryset = Book.objects.filter(keyword=keyword)
+                count = queryset.count()
+                if count < 20:
+                    api_search(keyword)
+                return queryset
+            else:
+                raise exceptions.ParseError({
+                    "ios_error_code": 4003,
+                    "book_id": ["This field may not be blank."]
+                })
+        else:
+            raise exceptions.ParseError({
+                "ios_error_code": 4002,
+                "keyword": ["This field is required."]
+            })
 
-    def delete(self):
-        pass
+
+class MyBook(generics.GenericAPIView,
+             mixins.ListModelMixin,
+             mixins.DestroyModelMixin):
+    serializer_class = MyBookSerializer
+    pagination_class = MyBookPagination
+
+    def get_queryset(self):
+        field = self.request.query_params.keys()
+        if field:
+            user_id = self.request.query_params.get('userid', None)
+            if user_id:
+                queryset = Book.objects.filter(myuser=user_id)
+                return queryset
+            else:
+                raise exceptions.ParseError({
+                    "ios_error_code": 4003,
+                    "userid": ["This field may not be blank."]
+                })
+        else:
+            raise exceptions.ParseError({
+                "ios_error_code": 4002,
+                "userid": ["This field is required."]
+            })
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        permission = self.request.auth
+        if permission:
+            field = self.request.data.keys()
+            if field:
+                book_id = self.request.data.get('book_id', '')
+                if book_id:
+                    try:
+                        book = Book.objects.get(pk=book_id)
+                    except:
+                        raise exceptions.ParseError({
+                            "ios_error_code": 4004,
+                            "detail": "Invalid book_id."
+                        })
+                    self.request.user.mybook.add(book)
+                    return Response({
+                        "detail": "Successfully added."
+                    }, status=status.HTTP_201_CREATED)
+                else:
+                    raise exceptions.ParseError({
+                        "ios_error_code": 4003,
+                        "book_id": ["This field may not be blank."]
+                    })
+            else:
+                raise exceptions.ParseError({
+                    "ios_error_code": 4002,
+                    "book_id": ["This field is required."]
+                })
+        else:
+            raise exceptions.AuthenticationFailed()
+
+    def delete(self, request, *args, **kwargs):
+        permission = self.request.auth
+        if permission:
+            field = self.request.data.keys()
+            if field:
+                book_id = self.request.data.get('book_id', '')
+                if book_id:
+                    try:
+                        book = Book.objects.get(pk=book_id)
+                    except:
+                        raise exceptions.ParseError({
+                            "ios_error_code": 4004,
+                            "detail": "Invalid book_id."
+                        })
+                    self.request.user.mybook.remove(book)
+                    return Response({
+                        "detail": "Successfully deleted."
+                    }, status=status.HTTP_200_OK)
+                else:
+                    raise exceptions.ParseError({
+                        "ios_error_code": 4003,
+                        "book_id": ["This field may not be blank."]
+                    })
+            else:
+                raise exceptions.ParseError({
+                    "ios_error_code": 4002,
+                    "book_id": ["This field is required."]
+                })
+        else:
+            raise exceptions.AuthenticationFailed()

@@ -6,19 +6,15 @@
 작업 시, 브랜치 이름을 꼭 확인해주세요.
 
 ```shell
-$ git checkout -b user-api origin/develop
+$ git checkout develop
+$ git pull
+$ git checkout -b user-api develop
 
-
+# 작업 후,
 # 커밋의 생활
 $ git add -A
 $ git commit -m "message"
 
-$ git pull --rebase
 $ git push origin user-api
 ```
-
-pull reqeust를 보낸다.
-이 때, **develop** > user-api 로 설정.
-
-풀리퀘를 받는 사람은 반드시 **Rebase and Merge**로 받는다.
 

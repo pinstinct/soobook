@@ -9,6 +9,7 @@ class Book(models.Model):
     publisher = models.CharField(max_length=100)
     description = models.TextField()
     updated_date = models.DateTimeField(auto_now=True)
+    keyword = models.CharField(max_length=200, null=True)
 
     def __str__(self):
         return self.title
