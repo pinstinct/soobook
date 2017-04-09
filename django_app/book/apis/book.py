@@ -25,9 +25,7 @@ class Search(generics.ListAPIView):
     def get_queryset(self):
         field = self.request.query_params.keys()
         if field:
-            print(field)
             keyword = self.request.query_params.get('keyword', '')
-            print(keyword)
             if keyword:
                 queryset = Book.objects.filter(keyword=keyword)
                 count = queryset.count()
@@ -76,8 +74,8 @@ class MyBook(generics.GenericAPIView,
     def post(self, request, *args, **kwargs):
         permission = self.request.auth
         if permission:
-            param = self.request.data.keys()
-            if param:
+            field = self.request.data.keys()
+            if field:
                 book_id = self.request.data.get('book_id', '')
                 if book_id:
                     try:
@@ -88,8 +86,9 @@ class MyBook(generics.GenericAPIView,
                             "detail": "Invalid book_id."
                         })
                     self.request.user.mybook.add(book)
-                    serializer = MyBookSerializer(book)
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    return Response({
+                        "detail": "Successfully added."
+                    }, status=status.HTTP_201_CREATED)
                 else:
                     raise exceptions.ParseError({
                         "ios_error_code": 4003,
@@ -106,8 +105,8 @@ class MyBook(generics.GenericAPIView,
     def delete(self, request, *args, **kwargs):
         permission = self.request.auth
         if permission:
-            param = self.request.data.keys()
-            if param:
+            field = self.request.data.keys()
+            if field:
                 book_id = self.request.data.get('book_id', '')
                 if book_id:
                     try:

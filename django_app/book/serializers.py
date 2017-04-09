@@ -35,4 +35,3 @@ class MyBookSerializer(serializers.ModelSerializer):
             'publisher',
             'description',
         )
-
