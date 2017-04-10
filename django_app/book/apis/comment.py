@@ -1,9 +1,19 @@
 from rest_framework.views import APIView
 
 __all__ = (
-    'Comment',
+    'CommentList',
+    'CommentAdd',
+    'CommentDelete',
 )
 
 
-class Comment(APIView):
+class CommentAdd(APIView):
+    pass
+
+
+class CommentDelete(APIView):
+    pass
+
+
+class CommentList(APIView):
     pass
