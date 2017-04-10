@@ -11,7 +11,7 @@ class BookPagination(PageNumberPagination):
 
 class MyBookPagination(PageNumberPagination):
     page_size = 9
-    # ordering = '-update_date'
+    # ordering = '-updated_date'
 
     def get_paginated_response(self, data):
         return Response(OrderedDict([
