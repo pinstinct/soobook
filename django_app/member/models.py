@@ -32,9 +32,9 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     nickname = models.CharField(max_length=256)
     is_staff = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True)
-    mybook = models.ManyToManyField(
-        Book
-    )
+    # mybook = models.ManyToManyField(
+    #     Book
+    # )
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = [

@@ -6,8 +6,8 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from book.models import Book
-from book.serializers import BookSerializer
-from book.serializers import MyBookSerializer
+from book.models import MyBook as MyBookModel
+from book.serializer import BookSerializer, MyBookSerializer
 from book.views import search as api_search
 from utils.pagination import BookPagination, MyBookPagination
 
@@ -55,7 +55,7 @@ class MyBook(generics.GenericAPIView,
         if field:
             user_id = self.request.query_params.get('userid', None)
             if user_id:
-                queryset = Book.objects.filter(myuser=user_id)
+                queryset = MyBookModel.objects.filter(user_id=user_id)
                 return queryset
             else:
                 raise exceptions.ParseError({
@@ -85,7 +85,13 @@ class MyBook(generics.GenericAPIView,
                             "ios_error_code": 4004,
                             "detail": "Invalid book_id."
                         })
-                    self.request.user.mybook.add(book)
+                    user = self.request.user
+                    user_id = user.pk
+                    MyBookModel.objects.update_or_create(
+                        user_id=user_id,
+                        book_id=book_id,
+                    )
+                    # self.request.user.mybook_set.add(book)
                     return Response({
                         "detail": "Successfully added."
                     }, status=status.HTTP_201_CREATED)
@@ -116,7 +122,10 @@ class MyBook(generics.GenericAPIView,
                             "ios_error_code": 4004,
                             "detail": "Invalid book_id."
                         })
-                    self.request.user.mybook.remove(book)
+                    user = self.request.user
+                    user_id = user.pk
+                    MyBookModel.objects.filter(user_id=user_id).filter(book_id=book_id).delete()
+                    # self.request.user.mybook.remove(book)
                     return Response({
                         "detail": "Successfully deleted."
                     }, status=status.HTTP_200_OK)
