@@ -1,19 +1,22 @@
 from django.contrib.auth import get_user_model
 from rest_framework import exceptions
 from rest_framework import generics
-from rest_framework import mixins
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from book.models import Book
 from book.models import MyBook as MyBookModel
 from book.serializer import BookSerializer, MyBookSerializer
+from book.serializer.book import MyBookDetailSerializer
 from book.views import search as api_search
 from utils.pagination import BookPagination, MyBookPagination
 
 __all__ = (
     'Search',
     'MyBook',
+    'MyBookDetail',
+    'MyBookSearch',
 )
 User = get_user_model()
 
@@ -44,32 +47,42 @@ class Search(generics.ListAPIView):
             })
 
 
-class MyBook(generics.GenericAPIView,
-             mixins.ListModelMixin,
-             mixins.DestroyModelMixin):
-    serializer_class = MyBookSerializer
-    pagination_class = MyBookPagination
+class MyBookSearch(generics.RetrieveAPIView):
+    pass
+
+
+class MyBookDetail(generics.ListAPIView):
+    serializer_class = MyBookDetailSerializer
 
     def get_queryset(self):
-        field = self.request.query_params.keys()
-        if field:
-            user_id = self.request.query_params.get('userid', None)
-            if user_id:
-                queryset = MyBookModel.objects.filter(user_id=user_id)
-                return queryset
-            else:
-                raise exceptions.ParseError({
-                    "ios_error_code": 4003,
-                    "userid": ["This field may not be blank."]
-                })
-        else:
-            raise exceptions.ParseError({
-                "ios_error_code": 4002,
-                "userid": ["This field is required."]
-            })
+        user = self.request.user
+        user_id = user.pk
+        book_id = self.request.query_params.get('bookid', '')
+        queryset = MyBookModel.objects.filter(user_id=user_id).filter(book_id=book_id)
+        return queryset
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+
+class MyBook(generics.GenericAPIView):
+    serializer_class = MyBookSerializer
+    pagination_class = MyBookPagination
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get(self, request):
+        permission = self.request.auth
+        if permission:
+            user = self.request.user
+            user_id = user.pk
+            queryset = MyBookModel.objects.filter(user_id=user_id).order_by('updated_date')
+
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(queryset, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            raise exceptions.AuthenticationFailed()
 
     def post(self, request, *args, **kwargs):
         permission = self.request.auth
