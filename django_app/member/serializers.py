@@ -7,11 +7,24 @@ from rest_framework.authtoken.models import Token
 User = get_user_model()
 
 
+class MyUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'pk',
+            'username',
+            'nickname',
+        )
+
+
 class TokenSerializer(serializers.ModelSerializer):
+    user = MyUserSerializer()
+
     class Meta:
         model = Token
         fields = (
             'key',
+            'user',
         )
 
 
