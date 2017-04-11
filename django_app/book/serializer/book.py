@@ -20,22 +20,42 @@ class BookSerializer(serializers.ModelSerializer):
             'author',
             'cover_thumbnail',
             'publisher',
+            # 'description', # 검색결과에서 제외
+        )
+
+
+class BookDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = (
+            'id',
+            'title',
+            'author',
+            'cover_thumbnail',
+            'publisher',
             'description',
         )
 
 
 class MyBookSerializer(serializers.ModelSerializer):
-    # mybook = BookSerializer(many=True)
+    book = BookSerializer()
 
     class Meta:
         model = MyBook
         fields = (
-            'id',
-            'book_id',
-            'updated_date'
-            # 'mybook',
-            # 'author',
-            # 'cover_thumbnail',
-            # 'publisher',
-            # 'description',
+            'user_id',
+            'book',
         )
+
+
+class MyBookDetailSerializer(serializers.ModelSerializer):
+    book = BookDetailSerializer()
+
+    class Meta:
+        model = MyBook
+        fields = (
+            'user_id',
+            'book',
+        )
+
+
