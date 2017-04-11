@@ -20,7 +20,6 @@ class BookSerializer(serializers.ModelSerializer):
             'author',
             'cover_thumbnail',
             'publisher',
-            # 'description', # 검색결과에서 제외
         )
 
 
@@ -57,5 +56,3 @@ class MyBookDetailSerializer(serializers.ModelSerializer):
             'user_id',
             'book',
         )
-
-

@@ -38,7 +38,7 @@ class Search(generics.ListAPIView):
             else:
                 raise exceptions.ParseError({
                     "ios_error_code": 4003,
-                    "book_id": ["This field may not be blank."]
+                    "keyword": ["This field may not be blank."]
                 })
         else:
             raise exceptions.ParseError({
@@ -47,17 +47,28 @@ class Search(generics.ListAPIView):
             })
 
 
-class MyBookSearch(generics.RetrieveAPIView):
-    pass
+class MyBookSearch(generics.ListAPIView):
+    queryset = MyBookModel.objects.all()
+    serializer_class = MyBookSerializer
+
+    def get_queryset(self):
+        print('mybook search')
+        user = self.request.user
+        keyword = self.request.query_params.get('keyword', '')
+        q = super().get_queryset().filter(user=user)
+        if keyword != '':
+            q = q.filter(book__title__contains=keyword)
+        return q
 
 
 class MyBookDetail(generics.ListAPIView):
     serializer_class = MyBookDetailSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         user = self.request.user
         user_id = user.pk
-        book_id = self.request.query_params.get('bookid', '')
+        book_id = self.request.query_params.get('bookid')
         queryset = MyBookModel.objects.filter(user_id=user_id).filter(book_id=book_id)
         return queryset
 
@@ -68,58 +79,66 @@ class MyBook(generics.GenericAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get(self, request):
-        permission = self.request.auth
-        if permission:
-            user = self.request.user
-            user_id = user.pk
-            queryset = MyBookModel.objects.filter(user_id=user_id).order_by('updated_date')
+        user = self.request.user
+        user_id = user.pk
+        queryset = MyBookModel.objects.filter(user_id=user_id).order_by('-updated_date')
 
-            page = self.paginate_queryset(queryset)
-            if page is not None:
-                serializer = self.get_serializer(queryset, many=True)
-                return self.get_paginated_response(serializer.data)
-
+        page = self.paginate_queryset(queryset)
+        if page is not None:
             serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)
-        else:
-            raise exceptions.AuthenticationFailed()
+            return self.get_paginated_response(serializer.data)
 
-    def post(self, request, *args, **kwargs):
-        permission = self.request.auth
-        if permission:
-            field = self.request.data.keys()
-            if field:
-                book_id = self.request.data.get('book_id', '')
-                if book_id:
-                    try:
-                        book = Book.objects.get(pk=book_id)
-                    except:
-                        raise exceptions.ParseError({
-                            "ios_error_code": 4004,
-                            "detail": "Invalid book_id."
-                        })
-                    user = self.request.user
-                    user_id = user.pk
-                    MyBookModel.objects.update_or_create(
-                        user_id=user_id,
-                        book_id=book_id,
-                    )
-                    # self.request.user.mybook_set.add(book)
-                    return Response({
-                        "detail": "Successfully added."
-                    }, status=status.HTTP_201_CREATED)
-                else:
-                    raise exceptions.ParseError({
-                        "ios_error_code": 4003,
-                        "book_id": ["This field may not be blank."]
-                    })
-            else:
-                raise exceptions.ParseError({
-                    "ios_error_code": 4002,
-                    "book_id": ["This field is required."]
-                })
-        else:
-            raise exceptions.AuthenticationFailed()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        user = self.request.user
+        user_id = user.pk
+        book_id = self.request.data.get('book_id')
+        MyBookModel.objects.get_or_create(
+            user_id=user_id,
+            book_id=book_id,
+        )
+        return Response({"detail": "Successfully added."}, status=status.HTTP_201_CREATED)
+
+    # def post(self, request):
+    #     permission = self.request.auth
+    #     if permission:
+    #         # field = self.request.data.keys()
+    #         # if field:
+    #         try:
+    #             book_id = self.request.data.get('book_id', '')
+    #             if book_id:
+    #                 try:
+    #                     book = Book.objects.get(pk=book_id)
+    #                 except:
+    #                     raise exceptions.ParseError({
+    #                         "ios_error_code": 4004,
+    #                         "detail": "Invalid book_id."
+    #                     })
+    #                 user = self.request.user
+    #                 user_id = user.pk
+    #                 MyBookModel.objects.get_or_create(
+    #                     user_id=user_id,
+    #                     book_id=book_id,
+    #                 )
+    #
+    #                 # self.request.user.mybook_set.add(book)
+    #                 return Response({
+    #                     "detail": "Successfully added."
+    #                 }, status=status.HTTP_201_CREATED)
+    #             else:
+    #                 raise exceptions.ParseError({
+    #                     "ios_error_code": 4003,
+    #                     "book_id": ["This field may not be blank."]
+    #                 })
+    #         except:
+    #             raise exceptions.ParseError({
+    #                 "ios_error_code": 4002,
+    #                 "book_id": ["This field is required."]
+    #             })
+    #     else:
+    #         raise exceptions.AuthenticationFailed()
 
     def delete(self, request, *args, **kwargs):
         permission = self.request.auth
