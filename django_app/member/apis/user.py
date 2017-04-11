@@ -7,15 +7,20 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from member.serializers import SignUpSerializer, LoginSerializer, TokenSerializer, MyUserSerializer
+from member.serializers import SignUpSerializer, LoginSerializer, TokenSerializer
 
 __all__ = (
+    'SignUpLogin',
     'SignUp',
     'Login',
     'Logout'
 )
 
 User = get_user_model()
+
+
+class SignUpLogin(APIView):
+    pass
 
 
 class SignUp(APIView):
@@ -29,7 +34,6 @@ class SignUp(APIView):
 
 class Login(APIView):
     permission_classes = (AllowAny,)
-    # queryset = User.objects.all()
 
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
@@ -39,7 +43,6 @@ class Login(APIView):
             token, _ = token_model.objects.get_or_create(user=user)
             serializer_token = TokenSerializer(instance=token)
         return Response(serializer_token.data, status=status.HTTP_200_OK)
-
 
 
 class Logout(APIView):
