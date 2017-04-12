@@ -51,27 +51,59 @@ class Search(generics.ListAPIView):
 class MyBookSearch(generics.ListAPIView):
     queryset = MyBookModel.objects.all()
     serializer_class = MyBookSerializer
-
-    def get_queryset(self):
-        # print('mybook search')
-        user = self.request.user
-        keyword = self.request.query_params.get('keyword', '')
-        q = super().get_queryset().filter(user=user)
-        if keyword != '':
-            q = q.filter(book__title__contains=keyword)
-        return q
-
-
-class MyBookDetail(generics.ListAPIView):
-    serializer_class = MyBookDetailSerializer
+    pagination_class = MyBookPagination
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
-        user = self.request.user
-        user_id = user.pk
-        book_id = self.request.query_params.get('bookid')
-        queryset = MyBookModel.objects.filter(user_id=user_id).filter(book_id=book_id)
-        return queryset
+        data = self.request.query_params.keys()
+        if data:
+            user = self.request.user
+            keyword = self.request.query_params.get('keyword', '')
+            q = super().get_queryset().filter(user=user)
+            if keyword != '':
+                q = q.filter(book__title__contains=keyword)
+            else:
+                raise exceptions.ParseError({"ios_error_code": 4003, "keyword": ["This field may not be blank."]})
+        else:
+            raise exceptions.ParseError({"ios_error_code": 4002, "keyword": ["This field is required."]})
+        return q
+
+    def get(self, request):
+        if self.request.auth:
+            self.get_queryset()
+        else:
+            raise exceptions.NotAuthenticated()
+        return self.list(self, request)
+
+
+class MyBookDetail(generics.ListAPIView):
+    queryset = MyBookModel.objects.all()
+    serializer_class = MyBookDetailSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get(self, request):
+        if self.request.auth:
+            data = self.request.query_params.keys()
+            if data:
+                book_id = self.request.query_params.get('bookid', '')
+                if book_id:
+                    try:
+                        book = Book.objects.get(pk=book_id)
+                        user = self.request.user
+                        q = super().get_queryset().filter(user=user).filter(book=book)
+                        if q:
+                            serializer = self.get_serializer(q, many=True)
+                            return Response(serializer.data)
+                        else:
+                            raise exceptions.ParseError()
+                    except:
+                        raise exceptions.ParseError({"ios_error_code": 4004, "detail": "Invalid bookid."})
+                else:
+                    raise exceptions.ParseError({"ios_error_code": 4003, "bookid": ["This field may not be blank."]})
+            else:
+                raise exceptions.ParseError({"ios_error_code": 4002, "bookid": ["This field is required."]})
+        else:
+            raise exceptions.NotAuthenticated()
 
 
 class MyBook(generics.GenericAPIView):
