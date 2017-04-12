@@ -13,6 +13,8 @@ import json
 import os
 
 # DEBUG = True
+from urllib.parse import quote
+
 DEBUG = os.environ.get('MODE') == 'DEBUG'
 STORAGE_S3 = os.environ.get('STORAGE') == 'S3' or DEBUG is False
 DB_RDS = os.environ.get('DB') == 'RDS'
@@ -79,6 +81,16 @@ else:
 
 SECRET_KEY = config['django']['secret_key']
 ALLOWED_HOSTS = config['django']['allowed_hosts']
+
+# Celery
+CELERY_BROKER_TRANSPORT = 'sqs'
+CELERY_BROKER_URL = 'sqs://{aws_access_key_id}:{aws_secret_access_key}@'.format(
+    aws_access_key_id=quote(config['aws']['access_key_id'], safe=''),
+    aws_secret_access_key=quote(config['aws']['secret_access_key'], safe=''),
+)
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'region': 'ap-northeast-2',
+}
 
 # Rest framework setting
 REST_FRAMEWORK = {

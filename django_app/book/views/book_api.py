@@ -14,7 +14,7 @@ def search_from_google_books(keyword, index=None):
         index = index * 10
     else:
         index = 0
-    key = config['youtube']['key']
+    key = config['google']['key']
     params = {
         'q': keyword,
         'langRestrict': 'ko',
@@ -70,9 +70,9 @@ def search_from_daum_books(keyword):
     return item
 
 
-def search(keyword):
+def search(keyword, num):
     if keyword != '':
-        for i in range(3):
+        for i in range(num):
             google_result_dic = search_from_google_books(keyword, i)
             google_items = google_result_dic['items']
 
