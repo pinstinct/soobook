@@ -23,6 +23,7 @@ class Comment(generics.GenericAPIView,
               mixins.UpdateModelMixin):
     serializer_class = CommentSerializer
     pagination_class = CommentPagenation
+    queryset = MyBookModel.objects.all()
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -37,13 +38,15 @@ class Comment(generics.GenericAPIView,
                     book = MyBookModel.object.get(pk=book_id)
                     if book:
                         try:
+                            user = self.request.user
+                            user_id = user.pk
                             content = self.request.data.get('content','')
-                            comment, _ = Comment.objects.update_or_create(book_id=book_id)
+                            comment, _ = Comment.objects.get_or_create(book_id=book_id , user_id=user_id)
                             Comment.content = content
                             comment.save()
                             serializer = CommentSerializer(comment)
                             return Response(serializer.data, {
-                                "detail": "Successfully added."
+                                "detail": "Successfully Comment added."
                             }, status=status.HTTP_201_CREATED)
                         except:
                             raise exceptions.ParseError({
@@ -78,7 +81,7 @@ class Comment(generics.GenericAPIView,
                             user_id = user.pk
                             Comment.objects.filter(user_id=user_id).filter(book_id=book_id).filter(comment_id=comment_id).delete()
                             return Response({
-                                "detail": "Successfully deleted."}, status=status.HTTP_200_OK)
+                                "detail": "Successfully Comment deleted."}, status=status.HTTP_201_OK)
                         except:
                             raise exceptions.ParseError({
                                 "ios_error_code": 1,
@@ -111,9 +114,10 @@ class Comment(generics.GenericAPIView,
                         try:
                             user = self.request.user
                             user_id = user.pk
-                            Comment.objects.filter(user_id=user_id).filter(book_id=book_id).filter(comment_id=comment_id).update()
+                            content = self.request.data.get('content', '')
+                            Comment.objects.filter(user_id=user_id).filter(book_id=book_id).filter(comment_id=comment_id).update(content)
                             return Response({
-                                "detail": "Successfully update." }, status=status.HTTP_200_OK)
+                                "detail": "Successfully update." }, status=status.HTTP_201_OK)
                         except:
                             raise exceptions.ParseError({
                                 "ios_error_code": 5000,
