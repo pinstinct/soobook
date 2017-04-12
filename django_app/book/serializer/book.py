@@ -42,7 +42,6 @@ class MyBookSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyBook
         fields = (
-            'user_id',
             'book',
         )
 
@@ -53,6 +52,5 @@ class MyBookDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyBook
         fields = (
-            'user_id',
             'book',
         )

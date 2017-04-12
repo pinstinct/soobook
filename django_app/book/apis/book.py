@@ -22,6 +22,7 @@ User = get_user_model()
 
 
 class Search(generics.ListAPIView):
+    queryset = Book.objects.all()
     serializer_class = BookSerializer
     pagination_class = BookPagination
 
@@ -32,8 +33,8 @@ class Search(generics.ListAPIView):
             if keyword:
                 queryset = Book.objects.filter(keyword=keyword)
                 count = queryset.count()
-                if count < 20:
-                    api_search(keyword)
+                if count < 10:
+                    api_search(keyword, 1)
                 return queryset
             else:
                 raise exceptions.ParseError({
@@ -74,22 +75,26 @@ class MyBookDetail(generics.ListAPIView):
 
 
 class MyBook(generics.GenericAPIView):
+    queryset = MyBookModel.objects.all()
     serializer_class = MyBookSerializer
     pagination_class = MyBookPagination
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get(self, request):
-        user = self.request.user
-        user_id = user.pk
-        queryset = MyBookModel.objects.filter(user_id=user_id).order_by('-updated_date')
+        if self.request.auth:
+            user = self.request.user
+            q = super().get_queryset().filter(user=user).order_by('-updated_date')
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(queryset, many=True)
-            return self.get_paginated_response(serializer.data)
+            # 페이지네이션
+            page = self.paginate_queryset(q)
+            if page is not None:
+                serializer = self.get_serializer(q, many=True)
+                return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+            serializer = self.get_serializer(q, many=True)
+            return Response(serializer.data)
+        else:
+            raise exceptions.NotAuthenticated()
 
     def post(self, request):
         user = self.request.user
@@ -133,12 +138,12 @@ class MyBook(generics.GenericAPIView):
     #                     "book_id": ["This field may not be blank."]
     #                 })
     #         except:
-    #             raise exceptions.ParseError({
+    #             raise ex  raise exceptions.AuthenticationFailed()ceptions.ParseError({
     #                 "ios_error_code": 4002,
     #                 "book_id": ["This field is required."]
     #             })
     #     else:
-    #         raise exceptions.AuthenticationFailed()
+    #
 
     def delete(self, request, *args, **kwargs):
         permission = self.request.auth
