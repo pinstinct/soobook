@@ -9,14 +9,15 @@ __all__ = (
 
 
 class Comment(models.Model):
-    updated_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    book = models.ForeignKey(MyBook)
-    comment = models.TextField(max_length=2000)
+    mybook = models.ForeignKey(MyBook)
+    content = models.TextField(max_length=2000, null=False)
+    comment_id = models.CharField(max_length=100)
 
     def __str__(self):
-        return '{} : {}'.format(
-            self.updated_date,
+        return '{} : {} : {}'.format(
+            self.created_date,
             self.book,
-            self.comment,
+            self.content,
         )

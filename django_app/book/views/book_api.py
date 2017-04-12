@@ -14,7 +14,7 @@ def search_from_google_books(keyword, index=None):
         index = index * 10
     else:
         index = 0
-    key = config['youtube']['key']
+    key = config['google']['api_key']
     params = {
         'q': keyword,
         'langRestrict': 'ko',
