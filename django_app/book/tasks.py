@@ -4,14 +4,6 @@ from book.views.book_api import save_detail_google_book
 from config.celery import app
 
 
-# @app.task
-# def book_google_id_data():
-#     books = Book.objects.values_list('google_id', flat=True)
-#     for google_id in books:
-#         print(google_id)
-#         save_detail_google_book(google_id)
-
-
 @app.task
 def book_google_id_data():
     books = Book.objects.values_list('google_id', 'publisher', 'description', 'cover_thumbnail')
