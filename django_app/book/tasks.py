@@ -25,4 +25,7 @@ def book_keyword_data():
     for keyword in books:
         count = Book.objects.filter(keyword=keyword).count()
         if count < 50:
-            search(keyword, 0, 5)
+            try:
+                search(keyword, 0, 5)
+            except KeyError:
+                pass
