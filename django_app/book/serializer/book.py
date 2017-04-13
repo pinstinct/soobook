@@ -20,18 +20,6 @@ class BookSerializer(serializers.ModelSerializer):
             'author',
             'cover_thumbnail',
             'publisher',
-        )
-
-
-class BookDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Book
-        fields = (
-            'id',
-            'title',
-            'author',
-            'cover_thumbnail',
-            'publisher',
             'description',
         )
 
@@ -42,15 +30,6 @@ class MyBookSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyBook
         fields = (
-            'book',
-        )
-
-
-class MyBookDetailSerializer(serializers.ModelSerializer):
-    book = BookDetailSerializer()
-
-    class Meta:
-        model = MyBook
-        fields = (
+            # 'id',
             'book',
         )
