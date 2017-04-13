@@ -9,7 +9,8 @@ from book.models import Book
 from book.models import MyBook as MyBookModel
 from book.serializer import BookSerializer, MyBookSerializer
 from book.serializer.book import MyBookDetailSerializer
-from book.views import search as api_search
+from book.views.book_api import search_data
+
 from utils.pagination import BookPagination, MyBookPagination
 
 __all__ = (
@@ -27,25 +28,19 @@ class Search(generics.ListAPIView):
     pagination_class = BookPagination
 
     def get_queryset(self):
-        field = self.request.query_params.keys()
-        if field:
+        data = self.request.query_params.keys()
+        if data:
             keyword = self.request.query_params.get('keyword', '')
             if keyword:
-                queryset = Book.objects.filter(keyword=keyword)
-                count = queryset.count()
+                q = super().get_queryset().filter(keyword=keyword)
+                count = q.count()
                 if count < 10:
-                    api_search(keyword, 1)
-                return queryset
+                    search_data(keyword, 0, 2)
+                return q
             else:
-                raise exceptions.ParseError({
-                    "ios_error_code": 4003,
-                    "keyword": ["This field may not be blank."]
-                })
+                raise exceptions.ParseError({"ios_error_code": 4003, "keyword": ["This field may not be blank."]})
         else:
-            raise exceptions.ParseError({
-                "ios_error_code": 4002,
-                "keyword": ["This field is required."]
-            })
+            raise exceptions.ParseError({"ios_error_code": 4002, "keyword": ["This field is required."]})
 
 
 class MyBookSearch(generics.ListAPIView):

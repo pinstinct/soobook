@@ -70,10 +70,10 @@ def search_from_daum_books(keyword):
     return item
 
 
-def search(keyword, num):
+def search(keyword, start, end):
     if keyword != '':
-        for i in range(num):
-            google_result_dic = search_from_google_books(keyword, i)
+        for start in range(end):
+            google_result_dic = search_from_google_books(keyword, start)
             google_items = google_result_dic['items']
 
             for item in google_items:
@@ -141,3 +141,90 @@ def search(keyword, num):
                     description='',
                     defaults=defaults
                 )
+
+
+def search_data(keyword, start, end):
+    books = []
+    if keyword != '':
+        for start in range(end):
+            google_result_dic = search_from_google_books(keyword, start)
+            google_items = google_result_dic['items']
+
+            for item in google_items:
+                google_id = item['id']
+                title = item['volumeInfo']['title']
+                try:
+                    authors = item['volumeInfo']['authors'][0]
+                except:
+                    authors = ''
+                try:
+                    cover_thumbnail = item['volumeInfo']['imageLinks']['thumbnail']
+                except:
+                    cover_thumbnail = ''
+                try:
+                    publisher = item['volumeInfo']['publisher']
+                except:
+                    publisher = ''
+                try:
+                    description = item['volumeInfo']['description']
+                except:
+                    description = ''
+
+                item_dict = {
+                    'keyword': keyword,
+                    'google_id': google_id,
+                    'title': title,
+                    'author': authors,
+                    'cover_thumbnail': cover_thumbnail,
+                    'publisher': publisher,
+                    'description': description,
+                }
+
+                data_exists = Book.objects.filter(google_id=google_id).exists()
+                if data_exists != True:
+                    books.append(item_dict)
+
+    Book.objects.bulk_create([Book(
+        google_id=book['google_id'],
+        keyword=book['keyword'],
+        title=book['title'],
+        author=book['author'],
+        cover_thumbnail=book['cover_thumbnail'],
+        publisher=book['publisher'],
+        description=book['description']
+    ) for book in books])
+
+
+def save_detail_google_book(google_id):
+    params = {
+        'volumeId': google_id
+    }
+    r = requests.get('https://www.googleapis.com/books/v1/volumes/volumeId', params=params)
+    result_dict = r.json()
+    result = result_dict['volumeInfo']
+
+    title = result['title']
+    try:
+        author = result['authors'][0]
+    except:
+        author = ''
+    try:
+        publisher = result['publisher']
+    except:
+        publisher = ''
+    try:
+        description = result['description']
+    except:
+        description = ''
+    try:
+        cover_thumbnail = result['imageLinks']['small']
+    except:
+        cover_thumbnail = ''
+
+    Book.objects.filter(google_id=google_id).update(
+        title=title,
+        author=author,
+        cover_thumbnail=cover_thumbnail,
+        publisher=publisher,
+        description=description
+    )
