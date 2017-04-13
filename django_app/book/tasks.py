@@ -14,13 +14,13 @@ from config.celery import app
 
 @app.task
 def book_google_id_data():
-    books = Book.objects.values_list('google_id', 'publisher', 'description')
+    books = Book.objects.values_list('google_id', 'publisher', 'description', 'cover_thumbnail')
     for book in books:
         google_id = book[0]
         publisher = book[1]
         description = book[2]
-        if (publisher or description) == '':
-            print(google_id)
+        cover_thumbnail = book[3]
+        if publisher == '' or description == '' or cover_thumbnail == '':
             try:
                 save_detail_google_book(google_id)
             except KeyError:
@@ -31,4 +31,6 @@ def book_google_id_data():
 def book_keyword_data():
     books = Book.objects.values_list('keyword', flat=True)
     for keyword in books:
-        search(keyword, 0, 5)
+        count = Book.objects.filter(keyword=keyword).count()
+        if count < 50:
+            search(keyword, 0, 5)

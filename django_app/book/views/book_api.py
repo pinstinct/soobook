@@ -1,3 +1,5 @@
+import re
+
 import requests
 
 from book.models import Book
@@ -93,7 +95,6 @@ def search(keyword, start, end):
                     try:
                         isbn = get_isbn_from_google_book(google_id)
                         daum_item = search_from_daum_books(isbn)
-                        # print(isbn)
                         cover_thumbnail = daum_item['cover_l_url']
                     except:
                         cover_thumbnail = ''
@@ -105,7 +106,6 @@ def search(keyword, start, end):
                     try:
                         isbn = get_isbn_from_google_book(google_id)
                         daum_item = search_from_daum_books(isbn)
-                        # print(isbn)
                         publisher = daum_item['pub_nm']
                     except:
                         publisher = ''
@@ -121,14 +121,12 @@ def search(keyword, start, end):
                         try:
                             isbn = get_isbn_from_google_book(google_id)
                             daum_item = search_from_daum_books(isbn)
-                            # print(isbn)
                             description = daum_item['description']
                         except:
                             description = ''
 
                 # 데이터베이스에 저장
                 defaults = {
-                    # 'google_id': google_id,
                     'title': title,
                     'author': authors,
                     'cover_thumbnail': cover_thumbnail,
@@ -136,7 +134,7 @@ def search(keyword, start, end):
                     'description': description,
                     'keyword': keyword,
                 }
-                obj, updated = Book.objects.update_or_create(
+                Book.objects.update_or_create(
                     google_id=google_id,
                     description='',
                     defaults=defaults
@@ -159,6 +157,8 @@ def search_data(keyword, start, end):
                     authors = ''
                 try:
                     cover_thumbnail = item['volumeInfo']['imageLinks']['thumbnail']
+                    # p = re.compile(r'.*[&]zoom=(\d+).*')
+                    # cover_thumbnail = re.sub(p, 2, cover_thumbnail_tmp)
                 except:
                     cover_thumbnail = ''
                 try:
@@ -203,11 +203,6 @@ def save_detail_google_book(google_id):
     result_dict = r.json()
     result = result_dict['volumeInfo']
 
-    title = result['title']
-    try:
-        author = result['authors'][0]
-    except:
-        author = ''
     try:
         publisher = result['publisher']
     except:
@@ -222,8 +217,6 @@ def save_detail_google_book(google_id):
         cover_thumbnail = ''
 
     Book.objects.filter(google_id=google_id).update(
-        title=title,
-        author=author,
         cover_thumbnail=cover_thumbnail,
         publisher=publisher,
         description=description

@@ -12,10 +12,10 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import json
 import os
 
-# DEBUG = True
 from urllib.parse import quote
 
-DEBUG = os.environ.get('MODE') == 'DEBUG'
+DEBUG = True
+# DEBUG = os.environ.get('MODE') == 'DEBUG'
 STORAGE_S3 = os.environ.get('STORAGE') == 'S3' or DEBUG is False
 DB_RDS = os.environ.get('DB') == 'RDS'
 print('DEBUG: {}'.format(DEBUG))
@@ -91,6 +91,7 @@ CELERY_BROKER_URL = 'sqs://{aws_access_key_id}:{aws_secret_access_key}@'.format(
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     'region': 'ap-northeast-2',
 }
+CELERY_RESULT_BACKEND = 'django-db'
 
 # Rest framework setting
 REST_FRAMEWORK = {
@@ -124,6 +125,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'storages',
+    'django_celery_results',
+    'django_celery_beat',
 
     'member',
     'book',

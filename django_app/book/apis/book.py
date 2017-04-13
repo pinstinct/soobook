@@ -7,10 +7,9 @@ from rest_framework.response import Response
 
 from book.models import Book
 from book.models import MyBook as MyBookModel
-from book.serializer import BookSerializer, MyBookSerializer
-from book.serializer.book import MyBookDetailSerializer
+from book.serializer import MyBookSerializer
+from book.serializer.book import MyBookDetailSerializer, BookDetailSerializer
 from book.views.book_api import search_data
-
 from utils.pagination import BookPagination, MyBookPagination
 
 __all__ = (
@@ -24,7 +23,7 @@ User = get_user_model()
 
 class Search(generics.ListAPIView):
     queryset = Book.objects.all()
-    serializer_class = BookSerializer
+    serializer_class = BookDetailSerializer
     pagination_class = BookPagination
 
     def get_queryset(self):
