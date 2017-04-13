@@ -3,6 +3,7 @@ awscli==1.11.68
 awsebcli==3.10.0
 billiard==3.5.0.2
 blessed==1.14.2
+boto==2.46.1
 boto3==1.4.4
 botocore==1.5.31
 celery==4.0.2
@@ -22,6 +23,7 @@ kombu==4.0.2
 pathspec==0.5.0
 psycopg2==2.7.1
 pyasn1==0.2.3
+pycurl==7.43.0
 Pygments==2.2.0
 python-dateutil==2.6.0
 pytz==2017.2
