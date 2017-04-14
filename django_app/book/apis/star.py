@@ -1,10 +1,10 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.validators import ValidationError
 from rest_framework import exceptions
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.core.validators import ValidationError
 
 from book.models import BookStar, MyBook
 from book.serializer import StarSerializer
@@ -18,14 +18,18 @@ class Star(APIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request):
+
         user_id = request.GET["user_id"]
-        book_list = MyBook.objects.filter(user_id=user_id)
-        star_list = []
-        for mybook in book_list:
-            bookstar, _ = BookStar.objects.get_or_create(mybook_id=mybook.pk)
-            star_list.append(bookstar)
-        serializer = StarSerializer(star_list, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if user_id:
+            book_list = MyBook.objects.filter(user_id=user_id)
+            star_list = []
+            for mybook in book_list:
+                bookstar, _ = BookStar.objects.get_or_create(mybook_id=mybook.pk)
+                star_list.append(bookstar)
+            serializer = StarSerializer(star_list, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            raise exceptions.ParseError({"ios_error_code": 4003, "detail": "Invalid user_id"})
 
     def post(self, request):
 
