@@ -8,7 +8,6 @@ __all__ = (
 
 
 class StarSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = BookStar
         fields = (
