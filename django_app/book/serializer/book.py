@@ -25,12 +25,13 @@ class BookSerializer(serializers.ModelSerializer):
 
 
 class MyBookSerializer(serializers.ModelSerializer):
-    book = BookSerializer()
     mybook_id = serializers.IntegerField(source='id')
+    book = BookSerializer()
 
     class Meta:
         model = MyBook
         fields = (
             'mybook_id',
             'book',
+            'comment',
         )
