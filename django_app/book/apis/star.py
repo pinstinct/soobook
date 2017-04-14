@@ -51,4 +51,4 @@ class Star(APIView):
         except (ValueError, ObjectDoesNotExist):
             raise exceptions.ParseError({"ios_error_code": 4004, "detail": "Invalid mybook_id"})
         except ValidationError:
-            raise exceptions.ValidationError({"ios_error_code": 4004, "detail": "Value is 1 ~ 10"})
+            raise exceptions.ValidationError({"ios_error_code": 4004, "detail": "Value between 1 and 10"})
