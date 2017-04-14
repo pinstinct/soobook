@@ -8,10 +8,12 @@ __all__ = (
 
 
 class BookCommentSerializer(serializers.ModelSerializer):
+    comment_id = serializers.IntegerField(source='id')
+
     class Meta:
         model = BookComment
         fields = (
-            'id',
+            'comment_id',
             'comment',
             'updated_date',
         )

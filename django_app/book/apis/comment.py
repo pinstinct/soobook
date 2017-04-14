@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework import status
 from rest_framework.response import Response
 
 from book.models import BookComment
@@ -25,4 +26,11 @@ class Comment(generics.GenericAPIView):
         )
 
         serializer = self.get_serializer(q)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        comment_id = self.request.data.get('comment_id')
+        q = super().get_queryset().get(id=comment_id)
+        if q:
+            q.delete()
+            return Response({"detail": "Successfully deleted."}, status=status.HTTP_200_OK)
