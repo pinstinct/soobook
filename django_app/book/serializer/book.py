@@ -35,6 +35,7 @@ class MyBookSerializer(serializers.ModelSerializer):
         model = MyBook
         fields = (
             'mybook_id',
+            'updated_date',
             'book',
             'comment',
             'star',

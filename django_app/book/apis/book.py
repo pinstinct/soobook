@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from book.models import Book
+from book.models import Book, BookStar
 from book.models import MyBook as MyBookModel
 from book.serializer import MyBookSerializer, BookSerializer
 from book.views.book_api import search_data
@@ -116,7 +116,7 @@ class MyBook(generics.GenericAPIView):
                 return self.get_paginated_response(serializer.data)
 
             serializer = self.get_serializer(q, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             raise exceptions.NotAuthenticated()
 
@@ -128,10 +128,11 @@ class MyBook(generics.GenericAPIView):
                 try:
                     book = Book.objects.get(pk=book_id)
                     user = self.request.user
-                    MyBookModel.objects.get_or_create(
+                    mybook, _ = MyBookModel.objects.get_or_create(
                         user=user,
                         book=book,
                     )
+                    BookStar.objects.create(mybook=mybook)
                     return Response({"detail": "Successfully added."},
                                     status=status.HTTP_201_CREATED)
                 except:
