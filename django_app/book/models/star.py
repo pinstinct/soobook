@@ -9,7 +9,11 @@ __all__ = (
 
 
 class BookStar(models.Model):
-    content = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(1)])
+    content = models.FloatField(
+        default=0,
+        validators=[MinValueValidator(0.0),
+                    MaxValueValidator(5.0)]
+    )
     created_date = models.DateTimeField(auto_now=True)
     mybook = models.ForeignKey(MyBook)
 
