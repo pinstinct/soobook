@@ -8,12 +8,14 @@ __all__ = (
 
 
 class StarSerializer(serializers.ModelSerializer):
+    star_id = serializers.IntegerField(source='id')
+
     class Meta:
         model = BookStar
         fields = (
-            'content',
+            'star_id',
+            'rating',
             'created_date',
-            'mybook',
         )
         read_only_fields = (
             'created_date',
