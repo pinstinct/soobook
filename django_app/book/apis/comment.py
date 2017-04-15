@@ -16,9 +16,9 @@ class Comment(generics.GenericAPIView):
 
     def post(self, request):
         mybook_id = self.request.data.get('mybook_id')
-        comment = self.request.data.get('comment')
+        content = self.request.data.get('content')
         defaults = {
-            'comment': comment
+            'content': content
         }
         q, _ = BookComment.objects.update_or_create(
             mybook_id=mybook_id,

@@ -9,7 +9,7 @@ __all__ = (
 
 
 class BookStar(models.Model):
-    rating = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(1)])
+    content = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(1)])
     created_date = models.DateTimeField(auto_now=True)
     mybook = models.ForeignKey(MyBook)
 
@@ -17,9 +17,9 @@ class BookStar(models.Model):
         return '{} : {} : {}'.format(
             self.mybook.user,
             self.mybook.book,
-            self.rating,
+            self.content,
         )
 
     def get_formated_star(self):
-        star = int(self.rating)
+        star = int(self.content)
         return star / 2 if star > 0 else 0

@@ -4,9 +4,9 @@ from book.models import MyBook
 
 
 class BookComment(models.Model):
-    comment = models.TextField()
+    content = models.TextField()
     updated_date = models.DateTimeField(auto_now=True)
     mybook = models.ForeignKey(MyBook)
 
     def __str__(self):
-        return self.comment
+        return self.content
