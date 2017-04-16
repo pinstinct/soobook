@@ -70,6 +70,6 @@ class Comment(generics.GenericAPIView):
                 except:
                     raise exceptions.ParseError({"ios_error_code": 4004, "detail": "Invalid comment_id."})
             else:
-                raise exceptions.ParseError({"comment_id": ["This field may not be blank."]})
+                raise exceptions.ParseError({"ios_error_code": 4003, "comment_id": ["This field may not be blank."]})
         else:
-            raise exceptions.ParseError({"comment_id": ["This field is required."]})
+            raise exceptions.ParseError({"ios_error_code": 4002, "comment_id": ["This field is required."]})
