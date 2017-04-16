@@ -13,8 +13,8 @@ class StarSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'content',
-            'created_date',
+            'updated_date',
         )
         read_only_fields = (
-            'created_date',
+            'updated_date',
         )

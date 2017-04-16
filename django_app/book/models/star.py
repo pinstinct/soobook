@@ -11,10 +11,10 @@ __all__ = (
 class BookStar(models.Model):
     content = models.FloatField(
         default=0,
-        validators=[MinValueValidator(0.0),
-                    MaxValueValidator(5.0)]
+        validators=[MinValueValidator(0),
+                    MaxValueValidator(5)]
     )
-    created_date = models.DateTimeField(auto_now=True)
+    updated_date = models.DateTimeField(auto_now=True)
     mybook = models.ForeignKey(MyBook)
 
     def __str__(self):
