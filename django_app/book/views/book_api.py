@@ -4,8 +4,8 @@ from book.models import Book
 from config.settings import config
 
 __all__ = (
-    # 'search_from_google_books',
     'search',
+    'search_data'
 )
 
 
@@ -14,7 +14,7 @@ def search_from_google_books(keyword, index=None):
         index = index * 10
     else:
         index = 0
-    key = config['youtube']['key']
+    key = config['google']['api_key']
     params = {
         'q': keyword,
         'langRestrict': 'ko',
@@ -70,10 +70,10 @@ def search_from_daum_books(keyword):
     return item
 
 
-def search(keyword):
+def search(keyword, start, end):
     if keyword != '':
-        for i in range(3):
-            google_result_dic = search_from_google_books(keyword, i)
+        for start in range(end):
+            google_result_dic = search_from_google_books(keyword, start)
             google_items = google_result_dic['items']
 
             for item in google_items:
@@ -93,7 +93,6 @@ def search(keyword):
                     try:
                         isbn = get_isbn_from_google_book(google_id)
                         daum_item = search_from_daum_books(isbn)
-                        # print(isbn)
                         cover_thumbnail = daum_item['cover_l_url']
                     except:
                         cover_thumbnail = ''
@@ -105,7 +104,6 @@ def search(keyword):
                     try:
                         isbn = get_isbn_from_google_book(google_id)
                         daum_item = search_from_daum_books(isbn)
-                        # print(isbn)
                         publisher = daum_item['pub_nm']
                     except:
                         publisher = ''
@@ -121,14 +119,12 @@ def search(keyword):
                         try:
                             isbn = get_isbn_from_google_book(google_id)
                             daum_item = search_from_daum_books(isbn)
-                            # print(isbn)
                             description = daum_item['description']
                         except:
                             description = ''
 
                 # 데이터베이스에 저장
                 defaults = {
-                    # 'google_id': google_id,
                     'title': title,
                     'author': authors,
                     'cover_thumbnail': cover_thumbnail,
@@ -136,8 +132,90 @@ def search(keyword):
                     'description': description,
                     'keyword': keyword,
                 }
-                obj, updated = Book.objects.update_or_create(
+                Book.objects.update_or_create(
                     google_id=google_id,
                     description='',
                     defaults=defaults
                 )
+
+
+def search_data(keyword, start, end):
+    books = []
+    if keyword != '':
+        for start in range(end):
+            google_result_dic = search_from_google_books(keyword, start)
+            google_items = google_result_dic['items']
+
+            for item in google_items:
+                google_id = item['id']
+                title = item['volumeInfo']['title']
+                try:
+                    authors = item['volumeInfo']['authors'][0]
+                except:
+                    authors = ''
+                try:
+                    cover_thumbnail = item['volumeInfo']['imageLinks']['thumbnail']
+                    # p = re.compile(r'.*[&]zoom=(\d+).*')
+                    # cover_thumbnail = re.sub(p, 2, cover_thumbnail_tmp)
+                except:
+                    cover_thumbnail = ''
+                try:
+                    publisher = item['volumeInfo']['publisher']
+                except:
+                    publisher = ''
+                try:
+                    description = item['volumeInfo']['description']
+                except:
+                    description = ''
+
+                item_dict = {
+                    'keyword': keyword,
+                    'google_id': google_id,
+                    'title': title,
+                    'author': authors,
+                    'cover_thumbnail': cover_thumbnail,
+                    'publisher': publisher,
+                    'description': description,
+                }
+
+                data_exists = Book.objects.filter(google_id=google_id).exists()
+                if data_exists != True:
+                    books.append(item_dict)
+
+    Book.objects.bulk_create([Book(
+        google_id=book['google_id'],
+        keyword=book['keyword'],
+        title=book['title'],
+        author=book['author'],
+        cover_thumbnail=book['cover_thumbnail'],
+        publisher=book['publisher'],
+        description=book['description']
+    ) for book in books])
+
+
+def save_detail_google_book(google_id):
+    params = {
+        'volumeId': google_id
+    }
+    r = requests.get('https://www.googleapis.com/books/v1/volumes/volumeId', params=params)
+    result_dict = r.json()
+    result = result_dict['volumeInfo']
+
+    try:
+        publisher = result['publisher']
+    except:
+        publisher = ''
+    try:
+        description = result['description']
+    except:
+        description = ''
+    try:
+        cover_thumbnail = result['imageLinks']['small']
+    except:
+        cover_thumbnail = ''
+
+    Book.objects.filter(google_id=google_id).update(
+        cover_thumbnail=cover_thumbnail,
+        publisher=publisher,
+        description=description
+    )

@@ -12,11 +12,11 @@
     {
       "name": "soobook-deploy",
       "essential": true,
-      "memory": 512,
+      "memory": 128,
       "portMappings": [
         {
           "hostPort": 80,
-          "containerPort": 4040
+          "containerPort": 4567
         }
       ]
     }

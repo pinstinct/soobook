@@ -12,10 +12,12 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import json
 import os
 
+from urllib.parse import quote
+
 # DEBUG = True
 DEBUG = os.environ.get('MODE') == 'DEBUG'
 STORAGE_S3 = os.environ.get('STORAGE') == 'S3' or DEBUG is False
-DB_RDS = os.environ.get('DB') == 'RDS'
+DB_RDS = os.environ.get('DB') == 'RDS' or DEBUG is False
 print('DEBUG: {}'.format(DEBUG))
 print('STORAGE_S3 : {}'.format(STORAGE_S3))
 print('DB_RDS : {}'.format(DB_RDS))
@@ -80,6 +82,17 @@ else:
 SECRET_KEY = config['django']['secret_key']
 ALLOWED_HOSTS = config['django']['allowed_hosts']
 
+# Celery
+CELERY_BROKER_TRANSPORT = 'sqs'
+CELERY_BROKER_URL = 'sqs://{aws_access_key_id}:{aws_secret_access_key}@'.format(
+    aws_access_key_id=quote(config['aws']['access_key_id'], safe=''),
+    aws_secret_access_key=quote(config['aws']['secret_access_key'], safe=''),
+)
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'region': 'ap-northeast-2',
+}
+CELERY_RESULT_BACKEND = 'django-db'
+
 # Rest framework setting
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -89,6 +102,9 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
 }
 
 # CORS setting
@@ -112,6 +128,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'storages',
+    'django_celery_results',
+    'django_celery_beat',
 
     'member',
     'book',

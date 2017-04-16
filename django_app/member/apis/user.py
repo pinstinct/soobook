@@ -10,12 +10,17 @@ from rest_framework.views import APIView
 from member.serializers import SignUpSerializer, LoginSerializer, TokenSerializer
 
 __all__ = (
+    'SignUpLogin',
     'SignUp',
     'Login',
     'Logout'
 )
 
 User = get_user_model()
+
+
+class SignUpLogin(APIView):
+    pass
 
 
 class SignUp(APIView):
