@@ -1,5 +1,3 @@
-import re
-
 import requests
 
 from book.models import Book
@@ -16,7 +14,7 @@ def search_from_google_books(keyword, index=None):
         index = index * 10
     else:
         index = 0
-    key = config['google']['key']
+    key = config['google']['api_key']
     params = {
         'q': keyword,
         'langRestrict': 'ko',

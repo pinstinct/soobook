@@ -21,9 +21,9 @@ class BookStar(models.Model):
         return '{} : {} : {}'.format(
             self.mybook.user,
             self.mybook.book,
-            self.content,
+            self.rating,
         )
 
     def get_formated_star(self):
-        star = int(self.content)
+        star = int(self.rating)
         return star / 2 if star > 0 else 0

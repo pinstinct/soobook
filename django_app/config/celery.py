@@ -14,8 +14,6 @@ app = Celery('soobook')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django app configs.
-# 작업을 등록해야 하는데 앱별로 분리되어 있을 경우,
-# 검색해서 태스크를 로드한다.
 app.autodiscover_tasks()
 
 
