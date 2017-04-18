@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from book.models import Book
 from book.models import MyBook as MyBookModel
-from book.serializer import MyBookSerializer, BookSerializer
+from book.serializer import MyBookSerializer, BookSerializer, MyBookDetailSerializer
 from book.views.book_api import search_data
 from utils.pagination import BookPagination, MyBookPagination
 
@@ -71,7 +71,7 @@ class MyBookSearch(generics.ListAPIView):
 
 class MyBookDetail(generics.GenericAPIView):
     queryset = MyBookModel.objects.all()
-    serializer_class = MyBookSerializer
+    serializer_class = MyBookDetailSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get(self, request):
