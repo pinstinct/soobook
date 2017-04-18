@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from book.models import BookStar, MyBook
-from book.serializer import StarSerializer
+from book.serializer import StarSerializer, StarListSerializer
 from utils.pagination import MyBookPagination
 
 __all__ = (
@@ -18,24 +18,24 @@ class Star(generics.GenericAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = MyBookPagination
 
-    # def get(self, request):
-    #     if self.request.auth:
-    #         user = self.request.user
-    #         book_list = MyBook.objects.filter(user=user)
-    #         star_list = []
-    #         for mybook in book_list:
-    #             bookstar = BookStar.objects.get(mybook_id=mybook.pk)
-    #             star_list.append(bookstar)
-    #
-    #         page = self.paginate_queryset(star_list)
-    #         if page is not None:
-    #             serializer = StarSerializer(star_list, many=True)
-    #             return self.get_paginated_response(serializer.data)
-    #
-    #         serializer = StarSerializer(star_list, many=True)
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     else:
-    #         raise exceptions.NotAuthenticated()
+    def get(self, request):
+        if self.request.auth:
+            user = self.request.user
+            book_list = MyBook.objects.filter(user=user)
+            star_list = []
+            for mybook in book_list:
+                bookstar = BookStar.objects.get(mybook_id=mybook.pk)
+                star_list.append(bookstar)
+
+            page = self.paginate_queryset(star_list)
+            if page is not None:
+                serializer = StarListSerializer(star_list, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = StarListSerializer(star_list, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            raise exceptions.NotAuthenticated()
 
     def post(self, request):
         try:
