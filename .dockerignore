@@ -1,5 +1,0 @@
-.python-version
-.git
-.gitignore
-front/
-**/db.sqlite3
