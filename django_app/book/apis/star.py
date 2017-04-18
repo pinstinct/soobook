@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from book.models import BookStar, MyBook
-from book.serializer import StarSerializer, StarListSerializer
+from book.serializer import StarListSerializer
 from utils.pagination import MyBookPagination
 
 __all__ = (
@@ -38,6 +38,7 @@ class Star(generics.GenericAPIView):
             raise exceptions.NotAuthenticated()
 
     def post(self, request):
+        data = self.request.data.keys()
         try:
             mybook_id = self.request.data.get('mybook_id', '')
             content = self.request.data.get('content', '')
@@ -51,12 +52,16 @@ class Star(generics.GenericAPIView):
                     defaults=defaults
                 )
                 bookstar.full_clean()
-                serializer = StarSerializer(bookstar)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response({"detail": "Successfully updated."}, status=status.HTTP_200_OK)
             else:
                 raise exceptions.PermissionDenied()
         except ValueError:
-            raise exceptions.ParseError({"detail": ["'mybook_id', 'content' field is required."]})
+            if data:
+                raise exceptions.ParseError({"ios_error_code": 4003,
+                                             "detail": ["'mybook_id', 'content' field may not be blank."]})
+            else:
+                raise exceptions.ParseError({"ios_error_code": 4002,
+                                             "detail": ["'mybook_id', 'content' field is required."]})
         except ObjectDoesNotExist:
             raise exceptions.ParseError({"ios_error_code": 4004, "detail": "Invalid mybook_id"})
         except ValidationError:
