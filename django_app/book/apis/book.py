@@ -30,7 +30,7 @@ class Search(generics.ListAPIView):
         if data:
             keyword = self.request.query_params.get('keyword', '')
             if keyword:
-                q = super().get_queryset().filter(keyword=keyword)
+                q = super().get_queryset().filter(title__contains=keyword)
                 count = q.count()
                 if count < 10:
                     search_data(keyword, 0, 2)
