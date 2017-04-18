@@ -1,3 +1,12 @@
-RUN         apt-get -y install curl
-RUN         curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN         apt-get -y install nodejs
+COPY        requirements.txt /srv
+WORKDIR     /srv
+RUN         pip3 install git+https://github.com/michaelhenry/boto.git@sqs_fixed
+RUN         pip3 install git+https://github.com/celery/celery.git@b27c0f143b86989a5f655bcc9592221bbbba0f5f
+RUN         pip3 install -r requirements.txt
+RUN         pip3 install uwsgi
+
+WORKDIR     /srv
+RUN         git clone https://github.com/lldldudalsll/team1.git front
+WORKDIR     /srv/front
+RUN         npm install && \
+            npm run build
