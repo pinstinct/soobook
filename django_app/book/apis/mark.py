@@ -42,13 +42,25 @@ class Mark(generics.GenericAPIView):
                                          "detail": ["'mybook_id', 'content' field is required."]})
 
     def put(self, request):
-        bookmakr_id = self.request.data.get('mark_id')
-        content = self.request.data.get('content')
-        q = super().get_queryset().filter(id=bookmakr_id).get()
-        q.content = content
-        q.save()
-        serializer = self.get_serializer(q)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = self.request.data.keys()
+        if data:
+            bookmakr_id = self.request.data.get('mark_id', '')
+            content = self.request.data.get('content', '')
+            if bookmakr_id and content != '':
+                try:
+                    q = super().get_queryset().filter(id=bookmakr_id).get()
+                    q.content = content
+                    q.save()
+                    serializer = self.get_serializer(q)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                except:
+                    raise exceptions.ParseError({"ios_error_code": 4004, "detail": "Invalid mark_id."})
+            else:
+                raise exceptions.ParseError({"ios_error_code": 4003,
+                                             "detail": ["'mark_id', 'content' field may not be blank."]})
+        else:
+            raise exceptions.ParseError({"ios_error_code": 4002,
+                                         "detail": ["'mark_id', 'content' field is required."]})
 
     def delete(self, request):
         bookmark_id = self.request.data.get('mark_id')
