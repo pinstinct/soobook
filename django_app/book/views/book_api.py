@@ -20,7 +20,6 @@ def search_from_google_books(keyword, index=None):
         'langRestrict': 'ko',
         'maxResults': 10,
         'startIndex': index,
-        'orderBy': 'relevance',
         'source': keyword,
         'key': key,
     }

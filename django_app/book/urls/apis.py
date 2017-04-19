@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^mybook/search/$', apis.MyBookSearch.as_view(), name='mybook_search'),
     url(r'^comment/$', apis.Comment.as_view(), name='comment'),
     url(r'^star/$', apis.Star.as_view(), name='star'),
+    url(r'^mark/$', apis.Mark.as_view(), name='mark'),
 ]
