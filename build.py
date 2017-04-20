@@ -91,6 +91,7 @@ else:
 with open(os.path.join(ROOT_DIR, filename), 'wt') as f:
     f.write(dockerfile)
 
+# docker build --no-cache . -t {imagename} -f {filename}
 build_command = 'docker build . -t {imagename} -f {filename}'.format(
     imagename=imagename,
     filename=filename
