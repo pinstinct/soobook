@@ -206,3 +206,11 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+
+#Email_smtp
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config['smtp']['host_user']
+EMAIL_HOST_PASSWORD = config['smtp']['host_password']
+SERVER_EMAIL = config['smtp']['server_email']
+DEFAULT_FROM_MAIL = config['smtp']['default_from_email']

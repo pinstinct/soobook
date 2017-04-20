@@ -45,6 +45,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         instance = User.objects.create_user(**validated_data)
+        instance.is_active = False
         return instance
 
 
@@ -71,3 +72,16 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class ActivationSerializer(serializers.Serializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+        )
+
+    def create(self, validated_data):
+        instance = User.objects.get(**validated_data)
+        instance.is_active = True
+        return instance

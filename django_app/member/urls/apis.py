@@ -7,4 +7,5 @@ urlpatterns = [
     url(r'^signup/$', apis.SignUp.as_view(), name='signup'),
     url(r'^login/$', apis.Login.as_view(), name='login'),
     url(r'^logout/$', apis.Logout.as_view(), name='logout'),
+    url(r'^activate/$', apis.Activate.as_view(), name='activate'),
 ]
