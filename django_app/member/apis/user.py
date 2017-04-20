@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 
 from django.contrib.auth import get_user_model, logout
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import permissions, generics
+from rest_framework import permissions, generics, exceptions
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, DEFAULT_FROM_MAIL
-from member.serializers import SignUpSerializer, LoginSerializer, TokenSerializer
+from member.serializers import SignUpSerializer, LoginSerializer, TokenSerializer, ActivationSerializer
 
 __all__ = (
     'SignUpLogin',
@@ -57,14 +57,17 @@ class SignUp(APIView):
 
 
 class Activate(generics.GenericAPIView):
-    def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
+    def get(self, request):
+        serializer = ActivationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.data['username']
             user = User.object.get(username=user)
             user.is_active = True
             user.save()
-        return Response({"detail": "Successfully activation"})
+            return Response({"detail": "Successfully activation"})
+        else:
+            return Response({"You accessed the wrong path."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class Login(APIView):
@@ -75,10 +78,15 @@ class Login(APIView):
         token_model = Token
         if serializer.is_valid(raise_exception=True):
             user = serializer.validated_data['user']
-            token, _ = token_model.objects.get_or_create(user=user)
-            serializer_token = TokenSerializer(instance=token)
-        return Response(serializer_token.data, status=status.HTTP_200_OK)
-
+            if not user.is_active:
+                msg = _('User account is disabled.')
+                return exceptions.ValidationError(msg)
+            else:
+                token, _ = token_model.objects.get_or_create(user=user)
+                serializer_token = TokenSerializer(instance=token)
+                return Response(serializer_token.data, status=status.HTTP_200_OK)
+        else:
+            return exceptions.ValidationError('')
 
 class Logout(APIView):
     permission_classes = (permissions.IsAuthenticated,)

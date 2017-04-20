@@ -73,3 +73,13 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class ActivationSerializer(serializers.Serializer):
+    user = MyUserSerializer()
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+        )
