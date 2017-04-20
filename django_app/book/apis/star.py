@@ -44,14 +44,10 @@ class Star(generics.GenericAPIView):
             content = self.request.data.get('content', '')
             mybook = MyBook.objects.get(id=mybook_id)
             if mybook.user == self.request.user:
-                defaults = {
-                    'content': content
-                }
-                bookstar, _ = BookStar.objects.update_or_create(
-                    mybook_id=mybook_id,
-                    defaults=defaults
-                )
+                bookstar = BookStar.objects.filter(mybook_id=mybook_id).get()
+                bookstar.content = content
                 bookstar.full_clean()
+                bookstar.save()
                 return Response({"detail": "Successfully updated."}, status=status.HTTP_200_OK)
             else:
                 raise exceptions.PermissionDenied()

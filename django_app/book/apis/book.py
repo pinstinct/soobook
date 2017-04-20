@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import exceptions
 from rest_framework import generics
 from rest_framework import status
@@ -25,23 +26,37 @@ class Search(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     pagination_class = BookPagination
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('title', 'author', 'keyword', 'publisher')
 
-    def get_queryset(self):
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        count = queryset.count()
+        keyword = kwargs.get('keyword')
+
+        if count < 10:
+            search_data(keyword, 0, 2)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get(self, request, *args, **kwargs):
         data = self.request.query_params.keys()
         if data:
             keyword = self.request.query_params.get('keyword', '')
             if keyword != '':
-                q = super().get_queryset().filter(title__contains=keyword)
-                count = q.count()
-
-                # DB에 데이터가 10개 이하이면, 외부 서버에 요청
-                if count < 10:
-                    search_data(keyword, 0, 2)
-                return q
+                return self.list(request, keyword=keyword)
             else:
-                raise exceptions.ParseError({"ios_error_code": 4003, "keyword": ["This field may not be blank."]})
+                raise exceptions.ParseError({"ios_error_code": 4003,
+                                             "keyword": ["This field may not be blank."]})
         else:
-            raise exceptions.ParseError({"ios_error_code": 4002, "keyword": ["This field is required."]})
+            raise exceptions.ParseError({"ios_error_code": 4002,
+                                         "keyword": ["This field is required."]})
 
 
 class MyBookSearch(generics.ListAPIView):
@@ -130,7 +145,8 @@ class MyBook(generics.GenericAPIView):
             user = self.request.user
 
             mybook, result = super().get_queryset().get_or_create(user=user, book=book)
-            BookStar.objects.create(mybook=mybook)
+            BookStar.objects.update_or_create(mybook=mybook)
+
             if result:
                 return Response({"detail": "Successfully added."}, status=status.HTTP_201_CREATED)
             else:
