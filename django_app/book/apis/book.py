@@ -1,10 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
 from rest_framework import exceptions
 from rest_framework import generics
 from rest_framework import status
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
@@ -27,10 +26,8 @@ class Search(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     pagination_class = BookPagination
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('title', 'author', 'keyword', 'publisher')
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('title', 'author', 'keyword', 'publisher')
+    filter_backends = (SearchFilter,)
+    search_fields = ('title', 'author', 'keyword', 'publisher')
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -38,7 +35,10 @@ class Search(generics.ListAPIView):
         keyword = kwargs.get('keyword')
 
         if count < 10:
-            search_data(keyword, 0, 2)
+            try:
+                search_data(keyword, 0, 2)
+            except KeyError:
+                raise exceptions.NotFound()
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -67,27 +67,27 @@ class MyBookSearch(generics.ListAPIView):
     serializer_class = MyBookSerializer
     pagination_class = MyBookPagination
     permission_classes = (IsAuthenticatedOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('book__title', 'book__author', 'book__publisher')
 
     def get_queryset(self):
-        data = self.request.query_params.keys()
-        if data:
-            user = self.request.user
-            keyword = self.request.query_params.get('keyword', '')
-            q = super().get_queryset().filter(user=user)
-            if keyword != '':
-                q = q.filter(book__title__contains=keyword)
-                return q
-            else:
-                raise exceptions.ParseError({"ios_error_code": 4003, "keyword": ["This field may not be blank."]})
-        else:
-            raise exceptions.ParseError({"ios_error_code": 4002, "keyword": ["This field is required."]})
+        return super().get_queryset().filter(user=self.request.user)
 
     def get(self, request, *args, **kwargs):
         if self.request.auth:
-            self.get_queryset()
+            data = self.request.query_params.keys()
+            if data:
+                keyword = self.request.query_params.get('keyword', '')
+                if keyword != '':
+                    return self.list(request, keyword=keyword)
+                else:
+                    raise exceptions.ParseError({"ios_error_code": 4003,
+                                                 "keyword": ["This field may not be blank."]})
+            else:
+                raise exceptions.ParseError({"ios_error_code": 4002,
+                                             "keyword": ["This field is required."]})
         else:
             raise exceptions.NotAuthenticated()
-        return self.list(self, request)
 
 
 class MyBookDetail(generics.GenericAPIView):
