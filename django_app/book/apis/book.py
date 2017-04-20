@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework import exceptions
 from rest_framework import generics
 from rest_framework import status
@@ -26,6 +27,8 @@ class Search(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     pagination_class = BookPagination
+    # filter_backends = (filters.SearchFilter,)
+    # search_fields = ('title', 'author', 'keyword', 'publisher')
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('title', 'author', 'keyword', 'publisher')
 
