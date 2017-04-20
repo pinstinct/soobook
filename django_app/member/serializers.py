@@ -41,6 +41,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             'username',
             'nickname',
             'password',
+            'is_active',
         )
 
     def create(self, validated_data):
@@ -61,11 +62,10 @@ class LoginSerializer(serializers.Serializer):
 
         if username and password:
             user = authenticate(username=username, password=password)
-
-        if user:
-            if not user.is_active:
-                msg = _('User account is disabled.')
-                raise exceptions.ValidationError(msg)
+            if user:
+                    if not user.is_active:
+                        msg = _('User account is disabled.')
+                        raise exceptions.ValidationError(msg)
         else:
             msg = _('Incorrect ID or Password')
             raise exceptions.ValidationError(msg)
@@ -74,14 +74,3 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
-class ActivationSerializer(serializers.Serializer):
-    class Meta:
-        model = User
-        fields = (
-            'username',
-        )
-
-    def create(self, validated_data):
-        instance = User.objects.get(**validated_data)
-        instance.is_active = True
-        return instance
