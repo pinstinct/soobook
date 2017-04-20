@@ -59,18 +59,17 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         username = attrs.get('username')
         password = attrs.get('password')
+        user = authenticate(username=username, password=password)
 
         if username and password:
             user = authenticate(username=username, password=password)
-            if user:
-                    if not user.is_active:
-                        msg = _('User account is disabled.')
-                        raise exceptions.ValidationError(msg)
+        if user:
+            if not user.is_active:
+                msg = _('User account is disabled.')
+                raise exceptions.ValidationError(msg)
         else:
             msg = _('Incorrect ID or Password')
             raise exceptions.ValidationError(msg)
 
         attrs['user'] = user
         return attrs
-
-
