@@ -4,3 +4,5 @@ RUN         pip3 install git+https://github.com/michaelhenry/boto.git@sqs_fixed
 RUN         pip3 install git+https://github.com/celery/celery.git@b27c0f143b86989a5f655bcc9592221bbbba0f5f
 RUN         pip3 install -r requirements.txt
 RUN         pip3 install uwsgi
+
+
