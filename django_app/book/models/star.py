@@ -18,12 +18,8 @@ class BookStar(models.Model):
     mybook = models.ForeignKey(MyBook)
 
     def __str__(self):
-        return '{} : {} : {}'.format(
+        return '{} : {}'.format(
             self.mybook.user,
             self.mybook.book,
-            self.rating,
         )
 
-    def get_formated_star(self):
-        star = int(self.rating)
-        return star / 2 if star > 0 else 0
