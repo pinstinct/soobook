@@ -39,5 +39,5 @@ class MyBookCommentTestCase(APILiveServerTestCase, APIAuthMixin, APIBookMixin):
             'content': '',
         }
         response = self.login_client.post(self.book_add_comment_url, data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response['content'], data['content'])
