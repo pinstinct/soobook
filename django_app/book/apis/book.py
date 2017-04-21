@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import exceptions
 from rest_framework import generics
+from rest_framework import mixins
+from rest_framework import permissions
 from rest_framework import status
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -119,26 +121,36 @@ class MyBookDetail(generics.GenericAPIView):
             raise exceptions.NotAuthenticated()
 
 
-class MyBook(generics.GenericAPIView):
+class HasUserIdInParamsOrIsAuthenticated(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        print('has_object_permission')
+        print(request.user.is_authenticated())
+        if ('user_id' in request.query_params or request.user.is_authenticated()) \
+                and request.method in permissions.SAFE_METHODS:
+            return True
+        return request.user == obj.user
+
+
+class MyBook(generics.GenericAPIView,
+             mixins.ListModelMixin,
+             mixins.CreateModelMixin,
+             mixins.DestroyModelMixin):
     queryset = MyBookModel.objects.all()
     serializer_class = MyBookSerializer
     pagination_class = MyBookPagination
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        # IsAuthenticated,
+        HasUserIdInParamsOrIsAuthenticated,
+    )
 
-    def get(self, request):
-        if self.request.auth:
-            user = self.request.user
-            q = super().get_queryset().filter(user=user).order_by('-updated_date')
-
-            page = self.paginate_queryset(q)
-            if page is not None:
-                serializer = self.get_serializer(q, many=True)
-                return self.get_paginated_response(serializer.data)
-
-            serializer = self.get_serializer(q, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        if self.request.user.is_authenticated():
+            return MyBookModel.objects.filter(user=self.request.user).order_by('-updated_date')
         else:
             raise exceptions.NotAuthenticated()
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
     def post(self, request):
         data = self.request.data.keys()
