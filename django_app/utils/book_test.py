@@ -1,4 +1,4 @@
-from book.models import Book, MyBook
+from book.models import Book
 
 
 class APIBookMixin(object):

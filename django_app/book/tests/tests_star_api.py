@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APILiveServerTestCase, APIClient
 
-from book.models import Book, MyBook
+from book.models import MyBook
 from utils.auth_test import APIAuthMixin
 from utils.book_test import APIBookMixin
 
