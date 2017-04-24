@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APILiveServerTestCase, APIClient
 
-from book.models import MyBook
+from book.models import MyBook, BookComment
 from utils.auth_test import APIAuthMixin
 from utils.book_test import APIBookMixin
 
@@ -33,11 +33,27 @@ class MyBookCommentTestCase(APILiveServerTestCase, APIAuthMixin, APIBookMixin):
         dummy_book = self.create_dummy_book()
         dummy_mybook = self.create_dummy_mybook(dummy_user, dummy_book)
 
-        # api : add
         data = {
             'mybook_id': dummy_mybook.pk,
-            'content': '',
+            'content': '테스트코드테스트코드테스트코드',
         }
         response = self.login_client.post(self.book_add_comment_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response['content'], data['content'])
+
+    def test_comment_detete(self):
+        dummy_user = User.objects.get()
+        dummy_book = self.create_dummy_book()
+        dummy_mybook = self.create_dummy_mybook(dummy_user, dummy_book)
+
+        data = {
+            'mybook_id': dummy_mybook.pk,
+            'content': '테스트코드테스트코드테스트코드',
+        }
+        response = self.login_client.post(self.book_add_comment_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        data = {
+            'comment_id': BookComment.objects.get(mybook_id=dummy_mybook.pk).pk,
+        }
+        response = self.login_client.delete(self.book_add_comment_url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
