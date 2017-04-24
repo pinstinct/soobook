@@ -16,7 +16,7 @@ __all__ = (
 
 class Star(generics.GenericAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    pagination_class = MyBookPagination
+    # pagination_class = MyBookPagination
 
     def get(self, request):
         if self.request.auth:
@@ -27,10 +27,10 @@ class Star(generics.GenericAPIView):
                 bookstar = BookStar.objects.get(mybook_id=mybook.pk)
                 star_list.append(bookstar)
 
-            page = self.paginate_queryset(star_list)
-            if page is not None:
-                serializer = StarListSerializer(star_list, many=True)
-                return self.get_paginated_response(serializer.data)
+            # page = self.paginate_queryset(star_list)
+            # if page is not None:
+            #     serializer = StarListSerializer(star_list, many=True)
+            #     return self.get_paginated_response(serializer.data)
 
             serializer = StarListSerializer(star_list, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -44,14 +44,10 @@ class Star(generics.GenericAPIView):
             content = self.request.data.get('content', '')
             mybook = MyBook.objects.get(id=mybook_id)
             if mybook.user == self.request.user:
-                defaults = {
-                    'content': content
-                }
-                bookstar, _ = BookStar.objects.update_or_create(
-                    mybook_id=mybook_id,
-                    defaults=defaults
-                )
+                bookstar = BookStar.objects.filter(mybook_id=mybook_id).get()
+                bookstar.content = content
                 bookstar.full_clean()
+                bookstar.save()
                 return Response({"detail": "Successfully updated."}, status=status.HTTP_200_OK)
             else:
                 raise exceptions.PermissionDenied()

@@ -102,9 +102,7 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
-    # 'DEFAULT_PERMISSION_CLASSES': (
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ),
+    'SEARCH_PARAM': 'keyword'
 }
 
 # CORS setting
@@ -130,6 +128,7 @@ INSTALLED_APPS = [
     'storages',
     'django_celery_results',
     'django_celery_beat',
+    'django_filters',
 
     'member',
     'book',

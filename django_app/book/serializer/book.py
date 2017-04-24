@@ -31,6 +31,7 @@ class MyBookSerializer(serializers.ModelSerializer):
     book = BookSerializer()
     comment = BookCommentSerializer(many=True, source='bookcomment_set')
     star = StarSerializer(many=True, source='bookstar_set')
+    mark = BookMarkSerializer(many=True, source='bookmark_set')
 
     class Meta:
         model = MyBook
@@ -40,6 +41,7 @@ class MyBookSerializer(serializers.ModelSerializer):
             'book',
             'comment',
             'star',
+            'mark',
         )
 
 

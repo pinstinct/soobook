@@ -71,8 +71,8 @@ def search_from_daum_books(keyword):
 
 def search(keyword, start, end):
     if keyword != '':
-        for start in range(end):
-            google_result_dic = search_from_google_books(keyword, start)
+        for i in range(end):
+            google_result_dic = search_from_google_books(keyword, i)
             google_items = google_result_dic['items']
 
             for item in google_items:
@@ -204,10 +204,10 @@ def save_detail_google_book(google_id):
         publisher = result['publisher']
     except:
         publisher = ''
-    try:
-        description = result['description']
-    except:
-        description = ''
+    # try:
+    #     description = result['description']
+    # except:
+    #     description = ''
     try:
         cover_thumbnail = result['imageLinks']['small']
     except:
@@ -216,5 +216,5 @@ def save_detail_google_book(google_id):
     Book.objects.filter(google_id=google_id).update(
         cover_thumbnail=cover_thumbnail,
         publisher=publisher,
-        description=description
+        # description=description
     )

@@ -1,3 +1,6 @@
+RUN         curl -sL https://deb.nodesource.com/setup_6.x | bash -
+RUN         apt-get -y install nodejs
+
 COPY        requirements.txt /srv
 WORKDIR     /srv
 RUN         pip3 install git+https://github.com/michaelhenry/boto.git@sqs_fixed

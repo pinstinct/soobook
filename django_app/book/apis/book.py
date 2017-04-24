@@ -2,7 +2,10 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import exceptions
 from rest_framework import generics
+from rest_framework import mixins
+from rest_framework import permissions
 from rest_framework import status
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
@@ -26,23 +29,40 @@ class Search(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     pagination_class = BookPagination
+    filter_backends = (SearchFilter,)
+    search_fields = ('title', 'author', 'keyword', 'publisher')
 
-    def get_queryset(self):
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        count = queryset.count()
+        keyword = kwargs.get('keyword')
+
+        if count < 10:
+            try:
+                search_data(keyword, 0, 2)
+            except KeyError:
+                raise exceptions.NotFound()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get(self, request, *args, **kwargs):
         data = self.request.query_params.keys()
         if data:
             keyword = self.request.query_params.get('keyword', '')
             if keyword != '':
-                q = super().get_queryset().filter(title__contains=keyword)
-                count = q.count()
-
-                # DB에 데이터가 10개 이하이면, 외부 서버에 요청
-                if count < 10:
-                    search_data(keyword, 0, 2)
-                return q
+                return self.list(request, keyword=keyword)
             else:
-                raise exceptions.ParseError({"ios_error_code": 4003, "keyword": ["This field may not be blank."]})
+                raise exceptions.ParseError({"ios_error_code": 4003,
+                                             "keyword": ["This field may not be blank."]})
         else:
-            raise exceptions.ParseError({"ios_error_code": 4002, "keyword": ["This field is required."]})
+            raise exceptions.ParseError({"ios_error_code": 4002,
+                                         "keyword": ["This field is required."]})
 
 
 class MyBookSearch(generics.ListAPIView):
@@ -50,27 +70,27 @@ class MyBookSearch(generics.ListAPIView):
     serializer_class = MyBookSerializer
     pagination_class = MyBookPagination
     permission_classes = (IsAuthenticatedOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('book__title', 'book__author', 'book__publisher')
 
     def get_queryset(self):
-        data = self.request.query_params.keys()
-        if data:
-            user = self.request.user
-            keyword = self.request.query_params.get('keyword', '')
-            q = super().get_queryset().filter(user=user)
-            if keyword != '':
-                q = q.filter(book__title__contains=keyword)
-                return q
-            else:
-                raise exceptions.ParseError({"ios_error_code": 4003, "keyword": ["This field may not be blank."]})
-        else:
-            raise exceptions.ParseError({"ios_error_code": 4002, "keyword": ["This field is required."]})
+        return super().get_queryset().filter(user=self.request.user)
 
     def get(self, request, *args, **kwargs):
         if self.request.auth:
-            self.get_queryset()
+            data = self.request.query_params.keys()
+            if data:
+                keyword = self.request.query_params.get('keyword', '')
+                if keyword != '':
+                    return self.list(request, keyword=keyword)
+                else:
+                    raise exceptions.ParseError({"ios_error_code": 4003,
+                                                 "keyword": ["This field may not be blank."]})
+            else:
+                raise exceptions.ParseError({"ios_error_code": 4002,
+                                             "keyword": ["This field is required."]})
         else:
             raise exceptions.NotAuthenticated()
-        return self.list(self, request)
 
 
 class MyBookDetail(generics.GenericAPIView):
@@ -102,26 +122,36 @@ class MyBookDetail(generics.GenericAPIView):
             raise exceptions.NotAuthenticated()
 
 
-class MyBook(generics.GenericAPIView):
+class HasUserIdInParamsOrIsAuthenticated(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        print('has_object_permission')
+        print(request.user.is_authenticated())
+        if ('user_id' in request.query_params or request.user.is_authenticated()) \
+                and request.method in permissions.SAFE_METHODS:
+            return True
+        return request.user == obj.user
+
+
+class MyBook(generics.GenericAPIView,
+             mixins.ListModelMixin,
+             mixins.CreateModelMixin,
+             mixins.DestroyModelMixin):
     queryset = MyBookModel.objects.all()
     serializer_class = MyBookSerializer
     pagination_class = MyBookPagination
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        # IsAuthenticated,
+        HasUserIdInParamsOrIsAuthenticated,
+    )
 
-    def get(self, request):
-        if self.request.auth:
-            user = self.request.user
-            q = super().get_queryset().filter(user=user).order_by('-updated_date')
-
-            page = self.paginate_queryset(q)
-            if page is not None:
-                serializer = self.get_serializer(q, many=True)
-                return self.get_paginated_response(serializer.data)
-
-            serializer = self.get_serializer(q, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        if self.request.user.is_authenticated():
+            return MyBookModel.objects.filter(user=self.request.user).order_by('-updated_date')
         else:
             raise exceptions.NotAuthenticated()
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
     def post(self, request):
         data = self.request.data.keys()
@@ -131,7 +161,8 @@ class MyBook(generics.GenericAPIView):
             user = self.request.user
 
             mybook, result = super().get_queryset().get_or_create(user=user, book=book)
-            BookStar.objects.create(mybook=mybook)
+            BookStar.objects.update_or_create(mybook=mybook)
+
             if result:
                 return Response({"detail": "Successfully added."}, status=status.HTTP_201_CREATED)
             else:
