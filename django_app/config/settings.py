@@ -106,11 +106,13 @@ REST_FRAMEWORK = {
 }
 
 # CORS setting
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = (
     'localhost:3000',
     'localhost:4040',
     'localhost:5050',
     'localhost:8080',
+    'https://front.devlim.net/',
 )
 
 # Application definition
