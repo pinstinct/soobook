@@ -5,11 +5,8 @@
 원하는 책을 검색하여 내 책장에 추가할 수 있습니다.
 추가한 책에 한줄 평가, 별점 평가, 책속 글귀를 입력할 수 있습니다.
 
-- [API 가이드](https://www.gitbook.com/book/pinstinct/soobook-api/details)
-- [API Server](https://soobook.devlim.net/)
-- [Web Front](https://front.devlim.net/)
 
-## [구현 기능](https://pinstinct.github.io/wps/2017/04/26/soobook-detail/)
+## [구현 기능](https://pinstinct.github.io/web/2017/04/26/soobook-detail/)
 
 ### 1. 회원관리 기능
 - 가입
@@ -40,7 +37,7 @@
 - 업데이트
 - 삭제
 
-## [테스트 코드](https://pinstinct.github.io/wps/2017/04/26/soobook-testcode/)
+## [테스트 코드](https://pinstinct.github.io/web/2017/04/26/soobook-testcode/)
 
 
 
