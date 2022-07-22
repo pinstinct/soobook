@@ -16,7 +16,7 @@ django-cors-headers==2.0.2
 django-filter==2.4.0
 django-rest-auth==0.9.1
 django-storages==1.5.2
-djangorestframework==3.6.2
+djangorestframework==3.11.2
 docker-py==1.7.2
 dockerpty==0.4.1
 docopt==0.6.2
