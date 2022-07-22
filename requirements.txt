@@ -6,7 +6,7 @@ blessed==1.14.2
 boto==2.46.1
 boto3==1.4.4
 botocore==1.5.31
-celery==4.0.2
+celery==5.2.2
 cement==2.8.2
 colorama==0.3.7
 Django==2.2.28
