@@ -27,7 +27,7 @@ pathspec==0.5.0
 psycopg2==2.7.1
 pyasn1==0.2.3
 pycurl==7.43.0
-Pygments==2.7.4
+Pygments==2.15.0
 python-dateutil==2.6.0
 pytz==2017.2
 PyYAML==5.4
